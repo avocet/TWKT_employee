@@ -146,7 +146,7 @@ export const defaultTasks: Task[] = [
   },
   {
     id: '2',
-    title: '廠商供货延遲通知',
+    title: '廠商供貨延遲通知',
     description: '原材料供應商通知由於物流問題，供貨將延遲一週。需要調整生產計劃。',
     source: 'vendor',
     attachment: '文件：supply_delaynotice.pdf',
