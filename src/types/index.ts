@@ -17,6 +17,8 @@ export interface WorkLog {
   date: string;
   task: string;
   response: string;
+  supervisorReply?: string;
+  supervisorReplyAt?: string;
   completionDate: string;
   timeSpent: string;
   problems: string;

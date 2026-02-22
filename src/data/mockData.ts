@@ -95,6 +95,8 @@ export const defaultWorkLogs: WorkLog[] = [
     date: '2026-02-22',
     task: '完成用戶登入模組開發，包括用戶名密碼登入和驗證碼登入',
     response: '已按需求完成開發，程式碼已提交審查',
+    supervisorReply: '做得很好，繼續保持！請記得更新技術文件。',
+    supervisorReplyAt: '2026-02-22T18:00:00Z',
     completionDate: '2026-02-22',
     timeSpent: '6小時',
     problems: '驗證碼發送介面有超時問題，需要優化',
