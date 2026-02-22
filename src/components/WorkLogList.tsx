@@ -75,6 +75,16 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
 
   const getUserName = (uid: string) => users.find(u => u.id === uid)?.name || '未知';
 
+  const isToday = (dateStr: string) => {
+    const today = new Date().toISOString().split('T')[0];
+    return dateStr === today;
+  };
+
+  const canEdit = (log: WorkLog) => {
+    if (isAdmin) return true;
+    return log.userId === userId && isToday(log.date);
+  };
+
   const handleExport = () => {
     const headers = ['日期', '員工姓名', '部門', '完成事項', '回覆', '完成日期', '花費時間', '遇到的問題', '狀態'];
     const csvContent = [
@@ -164,7 +174,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                     {statusLabels[log.status]}
                   </span>
                 </div>
-                {log.userId === userId && (
+                {canEdit(log) && (
                   <div className="flex gap-2">
                     <button
                       onClick={() => setEditingLog(log)}
