@@ -25,7 +25,7 @@ export default function MainLayout() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <span className="font-semibold text-gray-900">员工日志系统</span>
+            <span className="font-semibold text-gray-900">員工日誌系統</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -33,13 +33,13 @@ export default function MainLayout() {
               <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full bg-gray-200" />
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                <p className="text-xs text-gray-500">{isAdmin ? '管理员' : '员工'}</p>
+                <p className="text-xs text-gray-500">{isAdmin ? '管理員' : '員工'}</p>
               </div>
             </div>
             <button
               onClick={logout}
               className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
-              title="退出登录"
+              title="登出"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -60,7 +60,7 @@ export default function MainLayout() {
               </svg>
             }
           >
-            工作日志
+            工作日誌
           </NavButton>
           
           {isAdmin ? (
@@ -73,7 +73,7 @@ export default function MainLayout() {
                 </svg>
               }
             >
-              合同管理
+              契約管理
             </NavButton>
           ) : (
             <NavButton 
@@ -85,7 +85,7 @@ export default function MainLayout() {
                 </svg>
               }
             >
-              劳动合同
+              勞動契約
             </NavButton>
           )}
 
@@ -98,7 +98,7 @@ export default function MainLayout() {
               </svg>
             }
           >
-            问题分派
+            問題分派
           </NavButton>
         </div>
       </nav>

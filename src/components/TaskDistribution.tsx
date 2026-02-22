@@ -15,8 +15,8 @@ const statusColors = {
 };
 
 const statusLabels = {
-  pending: '待处理',
-  processing: '处理中',
+  pending: '待處理',
+  processing: '處理中',
   completed: '已完成',
 };
 
@@ -54,7 +54,7 @@ export function TaskDistribution({ userId, isAdmin }: TaskListProps) {
     saveTasks(updated);
   };
 
-  const getUserName = (uid: string) => users.find(u => u.id === uid)?.name || 'Unknown';
+  const getUserName = (uid: string) => users.find(u => u.id === uid)?.name || '未知';
 
   const filteredTasks = filter === 'my' 
     ? tasks.filter(t => t.assignedTo === userId)
@@ -67,7 +67,7 @@ export function TaskDistribution({ userId, isAdmin }: TaskListProps) {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">问题分派</h2>
+        <h2 className="text-xl font-semibold text-gray-900">問題分派</h2>
         <div className="flex gap-3">
           <select
             value={filter}
@@ -75,7 +75,7 @@ export function TaskDistribution({ userId, isAdmin }: TaskListProps) {
             className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
           >
             <option value="all">全部</option>
-            <option value="my">我的任务</option>
+            <option value="my">我的任務</option>
           </select>
           {isAdmin && (
             <button
@@ -85,7 +85,7 @@ export function TaskDistribution({ userId, isAdmin }: TaskListProps) {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              分派问题
+              分派問題
             </button>
           )}
         </div>
@@ -93,7 +93,7 @@ export function TaskDistribution({ userId, isAdmin }: TaskListProps) {
 
       {sortedTasks.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
-          <p>暂无问题分派</p>
+          <p>暫無問題分派</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -149,11 +149,11 @@ function TaskCard({ task, isAdmin, currentUserId, onUpdate, getUserName }: TaskC
             {statusLabels[task.status]}
           </span>
           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${task.source === 'client' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
-            {task.source === 'client' ? '客户' : '厂商'}
+            {task.source === 'client' ? '客戶' : '廠商'}
           </span>
         </div>
         <span className="text-sm text-gray-400">
-          {new Date(task.createdAt).toLocaleDateString('zh-CN')}
+          {new Date(task.createdAt).toLocaleDateString('zh-TW')}
         </span>
       </div>
 
@@ -170,7 +170,7 @@ function TaskCard({ task, isAdmin, currentUserId, onUpdate, getUserName }: TaskC
       )}
 
       <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-        <span>指派给：<span className="font-medium text-gray-700">{getUserName(task.assignedTo)}</span></span>
+        <span>指派給：<span className="font-medium text-gray-700">{getUserName(task.assignedTo)}</span></span>
         {task.completionDate && (
           <span>完成日期：<span className="font-medium text-gray-700">{task.completionDate}</span></span>
         )}
@@ -178,7 +178,7 @@ function TaskCard({ task, isAdmin, currentUserId, onUpdate, getUserName }: TaskC
 
       {task.response && (
         <div className="p-3 bg-gray-50 rounded-lg mb-3">
-          <p className="text-xs text-gray-400 mb-1">处理情况</p>
+          <p className="text-xs text-gray-400 mb-1">處理情況</p>
           <p className="text-gray-700 text-sm">{task.response}</p>
         </div>
       )}
@@ -190,7 +190,7 @@ function TaskCard({ task, isAdmin, currentUserId, onUpdate, getUserName }: TaskC
               <textarea
                 value={response}
                 onChange={(e) => setResponse(e.target.value)}
-                placeholder="填写处理情况..."
+                placeholder="填寫處理情況..."
                 rows={2}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
               />
@@ -206,15 +206,15 @@ function TaskCard({ task, isAdmin, currentUserId, onUpdate, getUserName }: TaskC
                   onChange={(e) => onUpdate(task.id, { status: e.target.value as Task['status'] })}
                   className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
                 >
-                  <option value="pending">待处理</option>
-                  <option value="processing">处理中</option>
+                  <option value="pending">待處理</option>
+                  <option value="processing">處理中</option>
                   <option value="completed">已完成</option>
                 </select>
                 <button
                   onClick={handleSaveResponse}
                   className="px-3 py-1.5 bg-primary text-white rounded-lg text-sm hover:bg-primary-dark"
                 >
-                  保存
+                  儲存
                 </button>
               </div>
             </div>
@@ -223,7 +223,7 @@ function TaskCard({ task, isAdmin, currentUserId, onUpdate, getUserName }: TaskC
               onClick={() => setShowResponse(true)}
               className="text-sm text-primary hover:underline"
             >
-              填写处理情况
+              填寫處理情況
             </button>
           )}
         </div>
@@ -265,7 +265,7 @@ function TaskFormModal({ users, onClose, onSubmit }: TaskFormModalProps) {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white rounded-xl w-full max-w-lg">
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold">分派新问题</h2>
+          <h2 className="text-lg font-semibold">分派新問題</h2>
           <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -275,7 +275,7 @@ function TaskFormModal({ users, onClose, onSubmit }: TaskFormModalProps) {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">问题标题</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">問題標題</label>
             <input
               type="text"
               value={title}
@@ -286,7 +286,7 @@ function TaskFormModal({ users, onClose, onSubmit }: TaskFormModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">问题描述</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">問題描述</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -298,18 +298,18 @@ function TaskFormModal({ users, onClose, onSubmit }: TaskFormModalProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">来源</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">來源</label>
               <select
                 value={source}
                 onChange={(e) => setSource(e.target.value as typeof source)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
               >
-                <option value="client">客户</option>
-                <option value="vendor">厂商</option>
+                <option value="client">客戶</option>
+                <option value="vendor">廠商</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">附件说明</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">附件說明</label>
               <input
                 type="text"
                 value={attachment}
@@ -321,14 +321,14 @@ function TaskFormModal({ users, onClose, onSubmit }: TaskFormModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">指派给</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">指派給</label>
             <select
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
               required
             >
-              <option value="">选择员工</option>
+              <option value="">選擇員工</option>
               {users.map(u => (
                 <option key={u.id} value={u.id}>{u.name} ({u.department})</option>
               ))}

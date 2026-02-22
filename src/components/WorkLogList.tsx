@@ -59,7 +59,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
   };
 
   const handleDelete = (id: string) => {
-    if (!confirm('确定要删除这条日志吗？')) return;
+    if (!confirm('確定要刪除這條日誌嗎？')) return;
     const updated = logs.filter(log => log.id !== id);
     setLogs(updated);
     saveWorkLogs(updated);
@@ -73,12 +73,12 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  const getUserName = (uid: string) => users.find(u => u.id === uid)?.name || 'Unknown';
+  const getUserName = (uid: string) => users.find(u => u.id === uid)?.name || '未知';
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">工作日志</h2>
+        <h2 className="text-xl font-semibold text-gray-900">工作日誌</h2>
         <button
           onClick={() => setIsFormOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
@@ -86,7 +86,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          新建日志
+          新建日誌
         </button>
       </div>
 
@@ -97,7 +97,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
             onChange={(e) => setFilterUserId(e.target.value)}
             className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
           >
-            <option value="">全部员工</option>
+            <option value="">全部員工</option>
             {users.filter(u => u.role === 'employee').map(u => (
               <option key={u.id} value={u.id}>{u.name}</option>
             ))}
@@ -107,7 +107,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
 
       {sortedLogs.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
-          <p>暂无工作日志</p>
+          <p>暫無工作日誌</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -147,13 +147,13 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
 
               <div className="space-y-3">
                 <div>
-                  <p className="text-xs text-gray-400 mb-1">完成事项</p>
+                  <p className="text-xs text-gray-400 mb-1">完成事項</p>
                   <p className="text-gray-700">{log.task}</p>
                 </div>
 
                 {log.response && (
                   <div>
-                    <p className="text-xs text-gray-400 mb-1">回复</p>
+                    <p className="text-xs text-gray-400 mb-1">回覆</p>
                     <p className="text-gray-600">{log.response}</p>
                   </div>
                 )}
@@ -167,7 +167,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                   )}
                   {log.timeSpent && (
                     <div>
-                      <span className="text-gray-400">花费时间：</span>
+                      <span className="text-gray-400">花費時間：</span>
                       <span className="text-gray-600">{log.timeSpent}</span>
                     </div>
                   )}
@@ -175,7 +175,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
 
                 {log.problems && (
                   <div className="p-3 bg-red-50 rounded-lg">
-                    <p className="text-xs text-red-600 font-medium mb-1">遇到的问题</p>
+                    <p className="text-xs text-red-600 font-medium mb-1">遇到的問題</p>
                     <p className="text-sm text-red-700">{log.problems}</p>
                   </div>
                 )}

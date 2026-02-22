@@ -60,7 +60,7 @@ export default function WorkLogForm({ isOpen, onClose, onSubmit, editingLog }: W
       <div className="relative bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">
-            {editingLog ? '编辑工作日志' : '新建工作日志'}
+            {editingLog ? '編輯工作日誌' : '新建工作日誌'}
           </h2>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,61 +96,61 @@ export default function WorkLogForm({ isOpen, onClose, onSubmit, editingLog }: W
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">完成事项 <span className="text-red-500">*</span></label>
-              <textarea
-                value={task}
-                onChange={(e) => setTask(e.target.value)}
-                placeholder="今日完成的工作事项..."
-                rows={3}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">回复</label>
-              <textarea
-                value={response}
-                onChange={(e) => setResponse(e.target.value)}
-                placeholder="对上级或客户的回复..."
-                rows={2}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">完成日期</label>
-                <input
-                  type="date"
-                  value={completionDate}
-                  onChange={(e) => setCompletionDate(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                <label className="block text-sm font-medium text-gray-700 mb-2">完成事項 <span className="text-red-500">*</span></label>
+                <textarea
+                  value={task}
+                  onChange={(e) => setTask(e.target.value)}
+                  placeholder="今日完成的工作事項..."
+                  rows={3}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+                  required
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">花费时间</label>
-                <input
-                  type="text"
-                  value={timeSpent}
-                  onChange={(e) => setTimeSpent(e.target.value)}
-                  placeholder="如：2小时30分钟"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                <label className="block text-sm font-medium text-gray-700 mb-2">回覆</label>
+                <textarea
+                  value={response}
+                  onChange={(e) => setResponse(e.target.value)}
+                  placeholder="對上級或客戶的回覆..."
+                  rows={2}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">遇到的问题</label>
-              <textarea
-                value={problems}
-                onChange={(e) => setProblems(e.target.value)}
-                placeholder="工作中遇到的问题..."
-                rows={2}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
-              />
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">完成日期</label>
+                  <input
+                    type="date"
+                    value={completionDate}
+                    onChange={(e) => setCompletionDate(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">花費時間</label>
+                  <input
+                    type="text"
+                    value={timeSpent}
+                    onChange={(e) => setTimeSpent(e.target.value)}
+                    placeholder="如：2小時30分鐘"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">遇到的問題</label>
+                <textarea
+                  value={problems}
+                  onChange={(e) => setProblems(e.target.value)}
+                  placeholder="工作中遇到的問題..."
+                  rows={2}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+                />
+              </div>
           </div>
         </form>
 
@@ -166,7 +166,7 @@ export default function WorkLogForm({ isOpen, onClose, onSubmit, editingLog }: W
             onClick={handleSubmit}
             className="px-5 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors"
           >
-            {editingLog ? '保存' : '创建'}
+            {editingLog ? '儲存' : '建立'}
           </button>
         </div>
       </div>

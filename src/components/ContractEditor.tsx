@@ -28,7 +28,7 @@ export default function ContractEditor({ onSuccess }: ContractEditorProps) {
     saveContract(updated);
     setContract(updated);
     setIsEditing(false);
-    alert('合同已保存，新版本：v' + updated.version);
+    alert('契約已儲存，新版本：v' + updated.version);
     onSuccess?.();
   };
 
@@ -38,8 +38,8 @@ export default function ContractEditor({ onSuccess }: ContractEditorProps) {
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">劳动合同管理</h2>
-          <p className="text-sm text-gray-500">版本 {contract.version} | 最后更新：{contract.updatedAt.split('T')[0]}</p>
+          <h2 className="text-lg font-semibold text-gray-900">勞動契約管理</h2>
+          <p className="text-sm text-gray-500">版本 {contract.version} | 最後更新：{contract.updatedAt.split('T')[0]}</p>
         </div>
         {isEditing ? (
           <div className="flex gap-2">
@@ -53,7 +53,7 @@ export default function ContractEditor({ onSuccess }: ContractEditorProps) {
               onClick={handleSave}
               className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
             >
-              保存
+              儲存
             </button>
           </div>
         ) : (
@@ -61,7 +61,7 @@ export default function ContractEditor({ onSuccess }: ContractEditorProps) {
             onClick={() => setIsEditing(true)}
             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
           >
-            编辑合同
+            編輯契約
           </button>
         )}
       </div>
