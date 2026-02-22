@@ -197,7 +197,7 @@ export const defaultContract: Contract = {
 <strong>乙方：</strong></p>
 <p>住址：高雄市苓雅區四維三路6號11樓B1<br/>
 電話：07-330-5577</p>
-<p>中華民國 年 月 日</p>`,
+`,
   updatedAt: '2026-03-01T00:00:00Z',
 };
 
