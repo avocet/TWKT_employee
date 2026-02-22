@@ -8,6 +8,7 @@ export default function ContractSigning() {
   const { user, updateUser } = useAuth();
   const [hasSigned, setHasSigned] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [showContract, setShowContract] = useState(true);
 
   useEffect(() => {
     setContract(getContract());
@@ -22,30 +23,10 @@ export default function ContractSigning() {
     };
     updateUser(updatedUser);
     setHasSigned(true);
+    setConfirmed(false);
   };
 
   if (!contract) return null;
-
-  if (hasSigned) {
-    return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="text-center py-8">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">已簽署勞動契約</h3>
-          <p className="text-gray-500 mb-4">
-            簽署時間：{user?.signedContractAt ? new Date(user.signedContractAt).toLocaleString('zh-TW') : '-'}
-          </p>
-          <p className="text-sm text-gray-400">
-            如有更新，請留意最新通知
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
@@ -65,24 +46,50 @@ export default function ContractSigning() {
         />
       </div>
 
-      <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-        <label className="flex items-center gap-3 mb-4">
-          <input 
-            type="checkbox" 
-            checked={confirmed}
-            onChange={(e) => setConfirmed(e.target.checked)}
-            className="w-4 h-4 text-primary" 
-          />
-          <span className="text-sm text-gray-600">我已閱讀並理解上述勞動契約條款</span>
-        </label>
-        <button
-          onClick={handleSign}
-          disabled={!confirmed}
-          className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          確認簽署
-        </button>
-      </div>
+      {hasSigned && (
+        <div className="mx-6 mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center gap-2 text-green-700">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-medium">
+              已於 {new Date(user?.signedContractAt || '').toLocaleString('zh-TW')} 簽署
+            </span>
+          </div>
+        </div>
+      )}
+
+      {!hasSigned && (
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <label className="flex items-center gap-3 mb-4">
+            <input 
+              type="checkbox" 
+              checked={confirmed}
+              onChange={(e) => setConfirmed(e.target.checked)}
+              className="w-4 h-4 text-primary" 
+            />
+            <span className="text-sm text-gray-600">我已閱讀並理解上述勞動契約條款</span>
+          </label>
+          <button
+            onClick={handleSign}
+            disabled={!confirmed}
+            className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            確認簽署
+          </button>
+        </div>
+      )}
+
+      {hasSigned && (
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <button
+            onClick={() => setShowContract(!showContract)}
+            className="text-sm text-primary hover:underline"
+          >
+            {showContract ? '隱藏契約內容' : '顯示契約內容'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
