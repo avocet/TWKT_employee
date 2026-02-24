@@ -198,7 +198,12 @@ export const defaultContract: Contract = {
 <p><strong>甲方：</strong>阿克索生醫股份有限公司<br/>
 <strong>乙方：</strong>____________</p>
 <p>住址：高雄市苓雅區四維三路6號11樓B1<br/>
+<<<<<<< HEAD
 電話：07-330-5577</p>`,
+=======
+電話：07-330-5577</p>
+`,
+>>>>>>> 3d0a32652cfb633f66d1fa8fd0ac9b9926caadf0
   updatedAt: '2026-03-01T00:00:00Z',
 };
 
