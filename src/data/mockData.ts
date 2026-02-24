@@ -5,6 +5,7 @@ export const defaultUsers: User[] = [
     id: '1',
     username: 'admin',
     password: 'admin123',
+    email: 'admin@twkt.com',
     name: '系統管理員',
     role: 'admin',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
@@ -14,6 +15,7 @@ export const defaultUsers: User[] = [
     id: '2',
     username: 'wang',
     password: '123456',
+    email: 'wang@twkt.com',
     name: '王曉明',
     role: 'employee',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=wang',
@@ -23,6 +25,7 @@ export const defaultUsers: User[] = [
     id: '3',
     username: 'li',
     password: '123456',
+    email: 'li@twkt.com',
     name: '李曉紅',
     role: 'employee',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=li',
@@ -32,9 +35,10 @@ export const defaultUsers: User[] = [
     id: '4',
     username: 'zhang',
     password: '123456',
+    email: 'zhang@twkt.com',
     name: '張三',
     role: 'employee',
-    avatar: 'https://api.dicebear.com/7.x//svg?seed=zavataaarshang',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zhang',
     department: '產品部',
   },
 ];
@@ -43,8 +47,13 @@ export const defaultContract: Contract = {
   id: '1',
   title: '阿克索生醫員工聘用契約書',
   version: 1,
-  content: `<h2>阿克索生醫（股）員工聘用契約書</h2>
-<p><strong>2026年03月 版本</strong></p>
+  content: `<style>
+.contract-title { text-align: center; }
+.contract-header { text-align: center; margin-bottom: 20px; }
+.highlight { background-color: #fef08a; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+</style>
+<h2 class="contract-title">阿克索生醫（股）員工聘用契約書</h2>
+<p class="contract-header"><strong>2026年03月 版本</strong></p>
 
 <p>立契約書人：阿克索生醫股份有限公司（以下簡稱甲方）<br/>
 受僱人 : （以下簡稱乙方）</p>
@@ -53,13 +62,6 @@ export const defaultContract: Contract = {
 
 <h3>第一條：契約期間/聘用類型</h3>
 <p>不定期契約：甲方自 年 月 日起，僱用乙方為 ____________</p>
-<p>聘用類型：</p>
-<ul>
-<li>實習生/應屆畢業</li>
-<li>內勤人員</li>
-<li>主管</li>
-<li>業務/外勤</li>
-</ul>
 
 <h3>第二條：工作內容</h3>
 <p>乙方應在工作上遵守甲方之規定，並遵守公司規章（如下附件），但甲方不得要求乙方從事不合法工作。工作項目如下，乙方願接受甲方指導監督，從事下列工作：</p>
@@ -84,7 +86,7 @@ export const defaultContract: Contract = {
 </ol>
 
 <h3>第四條：工資</h3>
-<p><strong>（一）</strong> 工資採「按月計酬」，甲方每月給付乙方工資 ：依 29000 (含1000全勤) 元。</p>
+<p><strong>（一）</strong> 工資採「按月計酬」，甲方每月給付乙方工資 ：依法定最低工資 (含1000元全勤) 。</p>
 <p><strong>（二）</strong>經乙方同意發放工資時間如下，如遇例假或休假時順延：</p>
 <ul>
 <li>每月一次：於每月8日發放前月之工資。</li>
@@ -194,10 +196,9 @@ export const defaultContract: Contract = {
 <p>若有爭議，雙方同意以高雄地方法院為第一審管轄法院本契約一式二份，由甲方及乙方各執一式為憑（附身分證影本）</p>
 
 <p><strong>甲方：</strong>阿克索生醫股份有限公司<br/>
-<strong>乙方：</strong></p>
+<strong>乙方：</strong>____________</p>
 <p>住址：高雄市苓雅區四維三路6號11樓B1<br/>
-電話：07-330-5577</p>
-<p>中華民國 年 月 日</p>`,
+電話：07-330-5577</p>`,
   updatedAt: '2026-03-01T00:00:00Z',
 };
 
@@ -252,8 +253,8 @@ export const defaultTasks: Task[] = [
     description: '客戶反映在提交訂單時出現系統錯誤，無法完成購買。客戶非常著急，希望盡快處理。',
     source: 'client',
     attachment: 'Email: customer@company.com',
-    assignedTo: '2',
-    response: '',
+    assignedTo: ['2'],
+    responses: [],
     completionDate: '',
     status: 'pending',
     createdAt: '2026-02-22T10:00:00Z',
@@ -265,8 +266,8 @@ export const defaultTasks: Task[] = [
     description: '原材料供應商通知由於物流問題，供貨將延遲一週。需要調整生產計劃。',
     source: 'vendor',
     attachment: '文件：supply_delaynotice.pdf',
-    assignedTo: '3',
-    response: '',
+    assignedTo: ['3'],
+    responses: [],
     completionDate: '',
     status: 'pending',
     createdAt: '2026-02-21T14:00:00Z',
@@ -278,8 +279,14 @@ export const defaultTasks: Task[] = [
     description: '企業客戶要求將歷史資料遷移到新系統，需要技術團隊支援。',
     source: 'client',
     attachment: 'Email: enterprise@bigcorp.com',
-    assignedTo: '2',
-    response: '已完成資料備份，正在編寫遷移腳本',
+    assignedTo: ['2'],
+    responses: [{
+      id: 'r1',
+      content: '已完成資料備份，正在編寫遷移腳本',
+      by: '2',
+      byName: '王小明',
+      createdAt: '2026-02-22T11:00:00Z'
+    }],
     completionDate: '2026-02-28',
     status: 'processing',
     createdAt: '2026-02-20T09:00:00Z',

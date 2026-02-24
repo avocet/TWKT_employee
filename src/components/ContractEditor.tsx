@@ -1,23 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Contract } from '../types';
 import { getContract, saveContract } from '../utils/storage';
 
-interface ContractEditorProps {
-  onSuccess?: () => void;
-}
-
-export default function ContractEditor({ onSuccess }: ContractEditorProps) {
+export default function ContractEditor() {
   const [contract, setContract] = useState<Contract | null>(null);
   const [content, setContent] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const c = getContract();
-    setContract(c);
-    setContent(c.content);
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    const fetchedContract = await getContract();
+    setContract(fetchedContract);
+    setContent(fetchedContract?.content || '');
+    setLoading(false);
   }, []);
 
-  const handleSave = () => {
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleSave = async () => {
     if (!contract) return;
     const updated: Contract = {
       ...contract,
@@ -25,61 +27,35 @@ export default function ContractEditor({ onSuccess }: ContractEditorProps) {
       version: contract.version + 1,
       updatedAt: new Date().toISOString(),
     };
-    saveContract(updated);
+    await saveContract(updated);
     setContract(updated);
-    setIsEditing(false);
     alert('契約已儲存，新版本：v' + updated.version);
-    onSuccess?.();
   };
 
-  if (!contract) return null;
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">載入中...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">勞動契約管理</h2>
-          <p className="text-sm text-gray-500">版本 {contract.version} | 最後更新：{contract.updatedAt.split('T')[0]}</p>
-        </div>
-        {isEditing ? (
-          <div className="flex gap-2">
-            <button
-              onClick={() => { setContent(contract.content); setIsEditing(false); }}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-            >
-              取消
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
-            >
-              儲存
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
-          >
-            編輯契約
-          </button>
-        )}
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">編輯勞動契約</h2>
+        <button
+          onClick={handleSave}
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
+        >
+          儲存
+        </button>
       </div>
-
-      <div className="p-6">
-        {isEditing ? (
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full h-96 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-primary font-mono text-sm"
-          />
-        ) : (
-          <div 
-            className="prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: contract.content }}
-          />
-        )}
-      </div>
+      <textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="w-full h-96 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-primary font-mono text-sm"
+      />
     </div>
   );
 }

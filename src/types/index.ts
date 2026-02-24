@@ -4,11 +4,15 @@ export interface User {
   id: string;
   username: string;
   password: string;
+  email: string;
   name: string;
   role: UserRole;
   avatar: string;
   department: string;
   signedContractAt?: string;
+  employmentType?: string;
+  contractStartDate?: string;
+  contractPdfUrl?: string;
 }
 
 export interface WorkLog {
@@ -40,19 +44,47 @@ export interface ContractSignature {
   signedAt: string;
 }
 
+export interface TaskAttachmentFile {
+  name: string;
+  size: number;
+  type: string;
+  data?: string;
+  url?: string;
+}
+
+export interface TaskResponse {
+  id: string;
+  content: string;
+  by: string;
+  byName: string;
+  createdAt: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  createdBy: string;
+}
+
 export interface Task {
   id: string;
   title: string;
   description: string;
-  source: 'client' | 'vendor';
+  source: string;
   attachment?: string;
-  assignedTo: string;
-  response: string;
+  attachmentFile?: TaskAttachmentFile;
+  assignedTo: string[];
+  responses: TaskResponse[];
   completionDate: string;
   status: 'pending' | 'processing' | 'completed';
   createdAt: string;
   updatedAt: string;
+  addResponse?: TaskResponse;
+  response?: string;
+  responseBy?: string;
 }
 
 export type WorkLogFormData = Omit<WorkLog, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
-export type TaskFormData = Omit<Task, 'id' | 'createdAt' | 'updatedAt'>;
+export type TaskFormData = Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'addResponse'> & { responses?: TaskResponse[] };
