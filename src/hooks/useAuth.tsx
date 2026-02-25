@@ -57,39 +57,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       let email = username.trim();
       
-      console.log('=== Login attempt ===');
-      console.log('Username:', username);
+      const { getDocs, collection } = await import('firebase/firestore');
       
-      const { getDoc, doc } = await import('firebase/firestore');
+      // Get all accounts and find matching name
+      const snapshot = await getDocs(collection(db, 'accounts'));
       
-      try {
-        // Query accounts collection using username as document ID
-        console.log('Querying accounts collection...');
-        const accountDoc = await getDoc(doc(db, 'accounts', username));
-        
-        if (accountDoc.exists()) {
-          const accountData = accountDoc.data();
-          console.log('✓ Found in accounts:', accountData);
-          
-          if (accountData.email) {
-            email = accountData.email;
-            console.log('✓ Email from accounts:', email);
-          }
-        } else {
-          console.log('✗ Document not found in accounts');
+      let found = null;
+      for (const d of snapshot.docs) {
+        const data = d.data();
+        if (data.name === username || d.id === username) {
+          found = data;
+          break;
         }
-      } catch (e) {
-        console.log('✗ Error querying accounts:', e);
+      }
+      
+      if (found && found.email) {
+        email = found.email;
+      } else {
+        alert('帳號不存在，請確認帳號正確');
+        return { success: false, error: '找不到此使用者，請確認帳號正確' };
       }
       
       // If email still doesn't have @, it's invalid
       if (!email || !email.includes('@')) {
-        console.log('✗ Invalid email:', email);
+        alert('Email 無效: ' + email);
         return { success: false, error: '找不到此使用者，請確認帳號正確' };
       }
-      
-      console.log('=== Attempting Firebase login ===');
-      console.log('Email:', email);
       
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       
