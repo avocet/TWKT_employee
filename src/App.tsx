@@ -15,12 +15,15 @@ function AppContent() {
     const checkUsers = async () => {
       try {
         const db = getFirestore(app);
-        const snapshot = await getDocs(collection(db, 'users'));
+        // Check accounts collection instead of users
+        const snapshot = await getDocs(collection(db, 'accounts'));
         if (snapshot.empty) {
           setNeedsSetup(true);
         }
       } catch (error) {
-        console.error('Error checking users:', error);
+        console.error('Error checking accounts:', error);
+        // If error, still allow setup
+        setNeedsSetup(true);
       }
       setCheckingSetup(false);
     };

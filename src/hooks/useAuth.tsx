@@ -57,30 +57,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       let email = username.trim();
       
-      console.log('Login attempt with username:', username);
+      console.log('=== Login attempt ===');
+      console.log('Username:', username);
       
       const { getDoc, doc } = await import('firebase/firestore');
       
-      // Query accounts collection using username as document ID
-      const accountDoc = await getDoc(doc(db, 'accounts', username));
-      
-      if (accountDoc.exists()) {
-        const accountData = accountDoc.data();
-        console.log('Found in accounts:', accountData);
+      try {
+        // Query accounts collection using username as document ID
+        console.log('Querying accounts collection...');
+        const accountDoc = await getDoc(doc(db, 'accounts', username));
         
-        if (accountData.email) {
-          email = accountData.email;
-          console.log('Found email from accounts:', email);
+        if (accountDoc.exists()) {
+          const accountData = accountDoc.data();
+          console.log('✓ Found in accounts:', accountData);
+          
+          if (accountData.email) {
+            email = accountData.email;
+            console.log('✓ Email from accounts:', email);
+          }
+        } else {
+          console.log('✗ Document not found in accounts');
         }
+      } catch (e) {
+        console.log('✗ Error querying accounts:', e);
       }
       
       // If email still doesn't have @, it's invalid
       if (!email || !email.includes('@')) {
-        console.log('Invalid email found:', email);
+        console.log('✗ Invalid email:', email);
         return { success: false, error: '找不到此使用者，請確認帳號正確' };
       }
       
-      console.log('Login email:', email);
+      console.log('=== Attempting Firebase login ===');
+      console.log('Email:', email);
       
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       
