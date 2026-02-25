@@ -94,10 +94,10 @@ export default function EmployeeAdmin() {
         await saveUser(newUser);
         console.log('Firestore user saved');
         
-        // Also save to accounts collection for login lookup (name + uid)
+        // Also save to accounts collection for login lookup (name + email)
         await setDoc(doc(db, 'accounts', formData.username), {
           name: formData.name,
-          uid: userId
+          email: formData.email
         });
         console.log('Account saved to accounts collection');
         

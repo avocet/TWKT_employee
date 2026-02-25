@@ -57,47 +57,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       let email = username.trim();
       
-      // Check if user exists in "accounts" collection to get their uid (publicly readable)
-      const { getDocs, getDoc, collection, query, where, doc } = await import('firebase/firestore');
+      console.log('Login attempt with username:', username);
       
-      // First try to find by name in accounts collection
-      const accountsRef = collection(db, 'accounts');
-      const nameQuery = query(accountsRef, where('name', '==', username));
-      const nameSnapshot = await getDocs(nameQuery);
+      const { getDoc, getDocs, collection, doc } = await import('firebase/firestore');
       
-      let uid = null;
-      
-      if (!nameSnapshot.empty) {
-        const accountDoc = nameSnapshot.docs[0];
-        const accountData = accountDoc.data();
-        uid = accountData.uid;
-        
-        // If we have UID, try to get email from users collection
-        if (uid) {
-          const userDoc = await getDoc(doc(db, 'users', uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            email = userData.email;
+      // Try to get directly from accounts collection using username as document ID
+      try {
+        const accountDoc = await getDoc(doc(db, 'accounts', username));
+        if (accountDoc.exists()) {
+          const accountData = accountDoc.data();
+          console.log('Found in accounts:', accountData);
+          
+          // Use email directly from accounts
+          if (accountData.email) {
+            email = accountData.email;
+            console.log('Found email from accounts:', email);
           }
         }
-      } else {
-        // Try to find by username in users collection directly
+      } catch (e) {
+        console.log('Error getting from accounts:', e);
+      }
+      
+      // If not found in accounts, try to find by name in users collection
+      if (email === username.trim()) {
+        console.log('Not found in accounts, searching in users...');
         const usersRef = collection(db, 'users');
-        const usernameQuery = query(usersRef, where('username', '==', username));
+        const { query, where } = await import('firebase/firestore');
+        const usernameQuery = query(usersRef, where('name', '==', username));
         const usernameSnapshot = await getDocs(usernameQuery);
         
         if (!usernameSnapshot.empty) {
           const userDoc = usernameSnapshot.docs[0];
           const userData = userDoc.data();
+          console.log('Found in users:', userData);
           email = userData.email;
-          uid = userDoc.id;
-        } else if (!email.includes('@')) {
-          // If not found and no @, add @twkt.com
-          email = `${email}@twkt.com`;
         }
       }
       
+      // If email still doesn't have @, it's invalid
       if (!email || !email.includes('@')) {
+        console.log('Invalid email found:', email);
         return { success: false, error: '找不到此使用者，請確認帳號正確' };
       }
       
