@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { User } from '../types';
 import { getUsers, saveUser } from '../hooks/useAuth';
-import { auth } from '../utils/firebase';
+import { auth, db } from '../utils/firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 const departments = ['技術部', '設計部', '產品部', '業務部', '管理部', '人力資源部', '財務部'];
 const employmentTypes = ['實習生/應屆畢業', '內勤人員', '主管', '業務/外勤'];
@@ -92,6 +93,13 @@ export default function EmployeeAdmin() {
         };
         await saveUser(newUser);
         console.log('Firestore user saved');
+        
+        // Also save to accounts collection for login lookup
+        await setDoc(doc(db, 'accounts', formData.username), {
+          username: formData.username,
+          email: formData.email
+        });
+        console.log('Account saved to accounts collection');
         
         // Re-login as admin using stored credentials
         const adminEmail = sessionStorage.getItem('adminEmail');

@@ -57,19 +57,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       let email = username.trim();
       
-      // Check if user exists in Firestore to get their stored email
+      // Check if user exists in "accounts" collection to get their stored email (publicly readable)
       const { getDocs, collection, query, where } = await import('firebase/firestore');
-      const usersRef = collection(db, 'users');
-      const usernameQuery = query(usersRef, where('username', '==', username));
+      const accountsRef = collection(db, 'accounts');
+      const usernameQuery = query(accountsRef, where('username', '==', username));
       const usernameSnapshot = await getDocs(usernameQuery);
       
       if (!usernameSnapshot.empty) {
-        const userDoc = usernameSnapshot.docs[0];
-        const userData = userDoc.data() as User;
-        // Use the stored email from Firestore
-        email = userData.email || `${username}@twkt.com`;
+        const accountDoc = usernameSnapshot.docs[0];
+        const accountData = accountDoc.data();
+        // Use the stored email from accounts collection
+        email = accountData.email || `${username}@twkt.com`;
       } else if (!email.includes('@')) {
-        // If not found in Firestore and no @, add @twkt.com
+        // If not found and no @, add @twkt.com
         email = `${email}@twkt.com`;
       }
       
