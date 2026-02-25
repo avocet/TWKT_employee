@@ -1,41 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // All operations require authentication
-    match /users/{userId} {
-      // Anyone authenticated can read all users
-      // Only admins (checked via custom claim or role field) can write
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.token.email == 'avocetmac@gmail.com';
-    }
-    
-    match /workLogs/{logId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.token.email == 'avocetmac@gmail.com';
-    }
-    
-    match /tasks/{taskId} {
-      allow read: if request.auth != null;
-      allow create, update, delete: if request.auth != null && request.auth.token.email == 'avocetmac@gmail.com';
-    }
-    
-    match /announcements/{announcementId} {
-      allow read: if request.auth != null;
-      allow create, update, delete: if request.auth != null && request.auth.token.email == 'avocetmac@gmail.com';
-    }
-    
-    match /contracts/{contractId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.token.email == 'avocetmac@gmail.com';
-    }
-    
-    match /contractSignatures/{signatureId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.token.email == 'avocetmac@gmail.com';
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }
