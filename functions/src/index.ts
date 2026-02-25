@@ -4,8 +4,8 @@ import * as nodemailer from 'nodemailer';
 
 admin.initializeApp();
 
-const Gmail_USER = 'taiwanakso@gmail.com';
-const Gmail_PASS = 'mpifoambjoocrjjx';
+const Gmail_USER = functions.config().gmail?.user || 'taiwanakso@gmail.com';
+const Gmail_PASS = functions.config().gmail?.pass || '';
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',

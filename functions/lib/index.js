@@ -1,12 +1,13 @@
 "use strict";
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendTaskResponseNotification = exports.sendTaskNotification = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 admin.initializeApp();
-const Gmail_USER = 'taiwanakso@gmail.com';
-const Gmail_PASS = 'mpifoambjoocrjjx';
+const Gmail_USER = ((_a = functions.config().gmail) === null || _a === void 0 ? void 0 : _a.user) || 'taiwanakso@gmail.com';
+const Gmail_PASS = ((_b = functions.config().gmail) === null || _b === void 0 ? void 0 : _b.pass) || '';
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
