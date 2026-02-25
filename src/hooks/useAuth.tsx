@@ -80,9 +80,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email = userData.email;
           }
         }
-      } else if (!email.includes('@')) {
-        // If not found and no @, add @twkt.com
-        email = `${email}@twkt.com`;
+      } else {
+        // Try to find by username in users collection directly
+        const usersRef = collection(db, 'users');
+        const usernameQuery = query(usersRef, where('username', '==', username));
+        const usernameSnapshot = await getDocs(usernameQuery);
+        
+        if (!usernameSnapshot.empty) {
+          const userDoc = usernameSnapshot.docs[0];
+          const userData = userDoc.data();
+          email = userData.email;
+          uid = userDoc.id;
+        } else if (!email.includes('@')) {
+          // If not found and no @, add @twkt.com
+          email = `${email}@twkt.com`;
+        }
+      }
+      
+      if (!email || !email.includes('@')) {
+        return { success: false, error: '找不到此使用者，請確認帳號正確' };
       }
       
       console.log('Login email:', email);
