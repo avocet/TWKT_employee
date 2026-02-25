@@ -59,38 +59,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       console.log('Login attempt with username:', username);
       
-      const { getDoc, getDocs, collection, doc } = await import('firebase/firestore');
+      const { getDoc, doc } = await import('firebase/firestore');
       
-      // Try to get directly from accounts collection using username as document ID
-      try {
-        const accountDoc = await getDoc(doc(db, 'accounts', username));
-        if (accountDoc.exists()) {
-          const accountData = accountDoc.data();
-          console.log('Found in accounts:', accountData);
-          
-          // Use email directly from accounts
-          if (accountData.email) {
-            email = accountData.email;
-            console.log('Found email from accounts:', email);
-          }
-        }
-      } catch (e) {
-        console.log('Error getting from accounts:', e);
-      }
+      // Query accounts collection using username as document ID
+      const accountDoc = await getDoc(doc(db, 'accounts', username));
       
-      // If not found in accounts, try to find by name in users collection
-      if (email === username.trim()) {
-        console.log('Not found in accounts, searching in users...');
-        const usersRef = collection(db, 'users');
-        const { query, where } = await import('firebase/firestore');
-        const usernameQuery = query(usersRef, where('name', '==', username));
-        const usernameSnapshot = await getDocs(usernameQuery);
+      if (accountDoc.exists()) {
+        const accountData = accountDoc.data();
+        console.log('Found in accounts:', accountData);
         
-        if (!usernameSnapshot.empty) {
-          const userDoc = usernameSnapshot.docs[0];
-          const userData = userDoc.data();
-          console.log('Found in users:', userData);
-          email = userData.email;
+        if (accountData.email) {
+          email = accountData.email;
+          console.log('Found email from accounts:', email);
         }
       }
       
