@@ -15,13 +15,19 @@ export interface User {
   contractPdfUrl?: string;
 }
 
+export interface WorkItemReply {
+  content: string;
+  by: string;
+  byName: string;
+  at: string;
+  isAdmin: boolean;
+}
+
 export interface WorkItem {
   id: string;
   content: string;
   status: 'pending' | 'processing' | 'completed';
-  reply?: string;
-  replyAt?: string;
-  repliedBy?: string;
+  replies?: WorkItemReply[];
 }
 
 export interface WorkLog {

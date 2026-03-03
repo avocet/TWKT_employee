@@ -88,14 +88,20 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
     
     // Handle individual item reply
     if (replyingItemId) {
+      const newReply = {
+        content: itemReplyContent,
+        by: userId,
+        byName: users.find(u => u.id === userId)?.name || '未知',
+        at: new Date().toISOString(),
+        isAdmin: isAdmin
+      };
+      
       const updatedItems = (replyingLog.workItems || []).map(item => {
         if (item.id === replyingItemId) {
           return {
             ...item,
-            reply: itemReplyContent || item.reply,
-            replyAt: itemReplyContent ? new Date().toISOString() : item.replyAt,
-            repliedBy: userId,
-            status: itemNewStatus
+            replies: [...(item.replies || []), newReply],
+            status: isAdmin ? itemNewStatus : item.status
           };
         }
         return item;
@@ -109,7 +115,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
       return;
     }
     
-    // Handle log-level reply
+    // Handle log-level reply (admin only)
     const updateData: Partial<WorkLog> = {
       supervisorReply: replyContent,
       supervisorReplyAt: new Date().toISOString()
@@ -253,7 +259,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                         {statusLabels[item.status]}
                       </span>
                       <span className="text-gray-700 flex-1">{item.content}</span>
-                      {isAdmin && !item.reply && (
+                      {((isAdmin && !item.replies?.some(r => r.isAdmin)) || (!isAdmin && !item.replies?.some(r => !r.isAdmin))) && (
                         <button
                           onClick={() => { setReplyingLog(log); setReplyingItemId(item.id); }}
                           className="text-xs text-primary hover:underline"
@@ -262,26 +268,29 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                         </button>
                       )}
                     </div>
-                    {item.reply && (
-                      <div className="mt-2 pl-2 border-l-2 border-blue-300">
-                        <p className="text-xs text-blue-600 mb-1">主管回覆</p>
-                        <p className="text-sm text-gray-700">{item.reply}</p>
+                    {item.replies?.map((reply, idx) => (
+                      <div key={idx} className="mt-2 pl-2 border-l-2 border-blue-300">
+                        <p className="text-xs text-blue-600 mb-1">{reply.isAdmin ? '主管回覆' : '員工回覆'} - {reply.byName}</p>
+                        <p className="text-sm text-gray-700">{reply.content}</p>
+                        <p className="text-xs text-gray-400">{new Date(reply.at).toLocaleString('zh-TW')}</p>
                       </div>
-                    )}
+                    ))}
                     {replyingItemId === item.id && (
                       <div className="mt-2 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600">狀態：</span>
-                          <select
-                            value={itemNewStatus}
-                            onChange={(e) => setItemNewStatus(e.target.value as 'pending' | 'processing' | 'completed')}
-                            className="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
-                          >
-                            <option value="pending">待處理</option>
-                            <option value="processing">處理中</option>
-                            <option value="completed">已完成</option>
-                          </select>
-                        </div>
+                        {isAdmin && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">狀態：</span>
+                            <select
+                              value={itemNewStatus}
+                              onChange={(e) => setItemNewStatus(e.target.value as 'pending' | 'processing' | 'completed')}
+                              className="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
+                            >
+                              <option value="pending">待處理</option>
+                              <option value="processing">處理中</option>
+                              <option value="completed">已完成</option>
+                            </select>
+                          </div>
+                        )}
                         <textarea
                           value={itemReplyContent}
                           onChange={(e) => setItemReplyContent(e.target.value)}
