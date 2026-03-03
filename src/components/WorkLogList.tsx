@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { WorkLog, WorkLogFormData, User } from '../types';
+import type { WorkLog, WorkLogFormData, User, WorkItem } from '../types';
 import { getWorkLogs, addWorkLog, updateWorkLog, deleteWorkLog } from '../utils/storage';
 import { getUsers } from '../hooks/useAuth';
 import WorkLogForm from './WorkLogForm';
@@ -29,6 +29,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
   const [filterUserId, setFilterUserId] = useState(isAdmin ? '' : userId);
   const [replyingLog, setReplyingLog] = useState<WorkLog | null>(null);
   const [replyContent, setReplyContent] = useState('');
+  const [updatedWorkItems, setUpdatedWorkItems] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
@@ -80,14 +81,23 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
   };
 
   const handleReply = async () => {
-    if (!replyingLog || !replyContent.trim()) return;
-    await updateWorkLog(replyingLog.id, {
+    if (!replyingLog) return;
+    
+    const updateData: Partial<WorkLog> = {
       supervisorReply: replyContent,
       supervisorReplyAt: new Date().toISOString()
-    });
+    };
+    
+    // If work items status was updated, include them in the update
+    if (updatedWorkItems.length > 0) {
+      updateData.workItems = updatedWorkItems;
+    }
+    
+    await updateWorkLog(replyingLog.id, updateData);
     await loadData();
     setReplyingLog(null);
     setReplyContent('');
+    setUpdatedWorkItems([]);
   };
 
   const getUserName = (uid: string) => users.find(u => u.id === uid)?.name || '未知';
@@ -241,7 +251,39 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
               {isAdmin && !log.supervisorReply && (
                 <div className="border-t border-gray-100 pt-3 mt-3">
                   {replyingLog?.id === log.id ? (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
+                      {/* Work items status update */}
+                      {(log.workItems || []).filter(item => item.status !== 'completed').length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-2">更新事項狀態：</p>
+                          <div className="space-y-2">
+                            {(log.workItems || []).filter(item => item.status !== 'completed').map(item => (
+                              <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                                <select
+                                  value={updatedWorkItems.find(wi => wi.id === item.id)?.status || item.status}
+                                  onChange={(e) => {
+                                    const newStatus = e.target.value as 'pending' | 'processing' | 'completed';
+                                    const existing = updatedWorkItems.find(wi => wi.id === item.id);
+                                    if (existing) {
+                                      setUpdatedWorkItems(updatedWorkItems.map(wi => 
+                                        wi.id === item.id ? { ...wi, status: newStatus } : wi
+                                      ));
+                                    } else {
+                                      setUpdatedWorkItems([...updatedWorkItems, { ...item, status: newStatus }]);
+                                    }
+                                  }}
+                                  className="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
+                                >
+                                  <option value="pending">待處理</option>
+                                  <option value="processing">處理中</option>
+                                  <option value="completed">已完成</option>
+                                </select>
+                                <span className="text-sm text-gray-700 flex-1">{item.content}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       <textarea
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}
