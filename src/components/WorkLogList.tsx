@@ -31,6 +31,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
   const [replyingItemId, setReplyingItemId] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
   const [itemReplyContent, setItemReplyContent] = useState('');
+  const [itemNewStatus, setItemNewStatus] = useState<'pending' | 'processing' | 'completed'>('pending');
   const [updatedWorkItems, setUpdatedWorkItems] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -86,14 +87,15 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
     if (!replyingLog) return;
     
     // Handle individual item reply
-    if (replyingItemId && itemReplyContent.trim()) {
+    if (replyingItemId) {
       const updatedItems = (replyingLog.workItems || []).map(item => {
         if (item.id === replyingItemId) {
           return {
             ...item,
-            reply: itemReplyContent,
-            replyAt: new Date().toISOString(),
-            repliedBy: userId
+            reply: itemReplyContent || item.reply,
+            replyAt: itemReplyContent ? new Date().toISOString() : item.replyAt,
+            repliedBy: userId,
+            status: itemNewStatus
           };
         }
         return item;
@@ -103,6 +105,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
       await loadData();
       setReplyingItemId(null);
       setItemReplyContent('');
+      setItemNewStatus('pending');
       return;
     }
     
@@ -267,6 +270,18 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                     )}
                     {replyingItemId === item.id && (
                       <div className="mt-2 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-600">狀態：</span>
+                          <select
+                            value={itemNewStatus}
+                            onChange={(e) => setItemNewStatus(e.target.value as 'pending' | 'processing' | 'completed')}
+                            className="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
+                          >
+                            <option value="pending">待處理</option>
+                            <option value="processing">處理中</option>
+                            <option value="completed">已完成</option>
+                          </select>
+                        </div>
                         <textarea
                           value={itemReplyContent}
                           onChange={(e) => setItemReplyContent(e.target.value)}
@@ -277,13 +292,12 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                         <div className="flex gap-2">
                           <button
                             onClick={handleReply}
-                            disabled={!itemReplyContent.trim()}
-                            className="px-2 py-1 bg-primary text-white text-xs rounded disabled:opacity-50"
+                            className="px-2 py-1 bg-primary text-white text-xs rounded"
                           >
                             儲存
                           </button>
                           <button
-                            onClick={() => { setReplyingItemId(null); setItemReplyContent(''); }}
+                            onClick={() => { setReplyingItemId(null); setItemReplyContent(''); setItemNewStatus('pending'); }}
                             className="px-2 py-1 text-gray-600 text-xs bg-gray-100 rounded"
                           >
                             取消
@@ -365,7 +379,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                           儲存回覆
                         </button>
                         <button
-                          onClick={() => { setReplyingLog(null); setReplyContent(''); setReplyingItemId(null); setUpdatedWorkItems([]); }}
+                          onClick={() => { setReplyingLog(null); setReplyContent(''); setReplyingItemId(null); setUpdatedWorkItems([]); setItemNewStatus('pending'); }}
                           className="px-3 py-1 text-gray-600 bg-gray-100 rounded-lg text-sm"
                         >
                           取消
