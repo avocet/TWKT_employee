@@ -15,21 +15,26 @@ export interface User {
   contractPdfUrl?: string;
 }
 
+export interface WorkItem {
+  id: string;
+  content: string;
+  status: 'pending' | 'processing' | 'completed';
+}
+
 export interface WorkLog {
   id: string;
   userId: string;
   date: string;
-  task: string;
+  workItems: WorkItem[];
   response: string;
   supervisorReply?: string;
   supervisorReplyAt?: string;
-  completionDate: string;
-  timeSpent: string;
   problems: string;
-  status: 'pending' | 'processing' | 'completed';
   createdAt: string;
   updatedAt: string;
 }
+
+export type WorkLogFormData = Omit<WorkLog, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
 
 export interface Contract {
   id: string;
@@ -86,5 +91,4 @@ export interface Task {
   responseBy?: string;
 }
 
-export type WorkLogFormData = Omit<WorkLog, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
 export type TaskFormData = Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'addResponse'> & { responses?: TaskResponse[] };

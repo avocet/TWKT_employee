@@ -50,6 +50,17 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
   const hasLoggedToday = logs.some(log => log.userId === userId && log.date === today);
   const canCreateLog = isAdmin || !hasLoggedToday;
 
+  // Get all pending/processing work items across all logs
+  const pendingItems = logs.flatMap(log => 
+    (log.workItems || [])
+      .filter(item => item.status === 'pending' || item.status === 'processing')
+      .map(item => ({
+        ...item,
+        date: log.date,
+        userId: log.userId
+      }))
+  );
+
   const handleCreate = async (data: WorkLogFormData) => {
     await addWorkLog({ userId, ...data });
     await loadData();
@@ -131,6 +142,23 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
         </div>
       )}
 
+      {pendingItems.length > 0 && (
+        <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <h3 className="font-medium text-orange-800 mb-2">進行中事項 ({pendingItems.length})</h3>
+          <div className="space-y-2">
+            {pendingItems.map((item) => (
+              <div key={item.id} className="flex items-center gap-2 text-sm">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[item.status]}`}>
+                  {statusLabels[item.status]}
+                </span>
+                <span className="text-gray-700 flex-1">{item.content}</span>
+                <span className="text-gray-400 text-xs">{item.date}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {filteredLogs.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           <p>暫無工作日誌</p>
@@ -141,9 +169,6 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
             <div key={log.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[log.status]}`}>
-                    {statusLabels[log.status]}
-                  </span>
                   <span className="text-sm text-gray-500">{log.date}</span>
                   {isAdmin && (
                     <span className="text-sm text-gray-400">• {getUserName(log.userId)} ({getUserDepartment(log.userId)})</span>
@@ -167,17 +192,21 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                 )}
               </div>
 
-              <h3 className="font-semibold text-gray-900 mb-2">{log.task}</h3>
-              <p className="text-gray-600 text-sm mb-2">{log.response}</p>
-
-              <div className="flex gap-4 text-sm text-gray-500 mb-3">
-                {log.completionDate && (
-                  <span>完成日期：{log.completionDate}</span>
-                )}
-                {log.timeSpent && (
-                  <span>花費時間：{log.timeSpent}</span>
-                )}
+              <div className="space-y-2 mb-2">
+                {log.workItems?.map((item) => (
+                  <div key={item.id} className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[item.status]}`}>
+                      {statusLabels[item.status]}
+                    </span>
+                    <span className="text-gray-700">{item.content}</span>
+                  </div>
+                ))}
               </div>
+              {log.response && (
+                <p className="text-gray-600 text-sm mb-2">
+                  <span className="font-medium">回覆：</span>{log.response}
+                </p>
+              )}
 
               {log.problems && (
                 <div className="p-3 bg-red-50 rounded-lg mb-3">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { WorkLog, WorkLogFormData } from '../types';
+import type { WorkLog, WorkLogFormData, WorkItem } from '../types';
 
 interface WorkLogFormProps {
   isOpen?: boolean;
@@ -12,45 +12,57 @@ interface WorkLogFormProps {
 export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData }: WorkLogFormProps) {
   const log = editingLog || initialData;
   const [date, setDate] = useState('');
-  const [task, setTask] = useState('');
+  const [workItems, setWorkItems] = useState<WorkItem[]>([]);
+  const [newWorkItem, setNewWorkItem] = useState('');
+  const [newWorkItemStatus, setNewWorkItemStatus] = useState<'pending' | 'processing' | 'completed'>('pending');
   const [response, setResponse] = useState('');
-  const [completionDate, setCompletionDate] = useState('');
-  const [timeSpent, setTimeSpent] = useState('');
   const [problems, setProblems] = useState('');
-  const [status, setStatus] = useState<'pending' | 'processing' | 'completed'>('pending');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (log) {
       setDate(log.date);
-      setTask(log.task);
+      setWorkItems(log.workItems || []);
       setResponse(log.response);
-      setCompletionDate(log.completionDate);
-      setTimeSpent(log.timeSpent);
-      setProblems(log.problems);
-      setStatus(log.status);
+      setProblems(log.problems || '');
     } else {
       setDate(new Date().toISOString().split('T')[0]);
-      setTask('');
+      setWorkItems([]);
       setResponse('');
-      setCompletionDate('');
-      setTimeSpent('');
       setProblems('');
-      setStatus('pending');
     }
   }, [log]);
+
+  const addWorkItem = () => {
+    if (!newWorkItem.trim()) return;
+    const item: WorkItem = {
+      id: Date.now().toString(),
+      content: newWorkItem,
+      status: newWorkItemStatus
+    };
+    setWorkItems([...workItems, item]);
+    setNewWorkItem('');
+    setNewWorkItemStatus('pending');
+  };
+
+  const removeWorkItem = (id: string) => {
+    setWorkItems(workItems.filter(item => item.id !== id));
+  };
+
+  const updateWorkItemStatus = (id: string, status: 'pending' | 'processing' | 'completed') => {
+    setWorkItems(workItems.map(item => 
+      item.id === id ? { ...item, status } : item
+    ));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     await onSubmit({
       date,
-      task,
+      workItems,
       response,
-      completionDate,
-      timeSpent,
-      problems,
-      status
+      problems
     });
     setSaving(false);
   };
@@ -69,41 +81,67 @@ export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
-                required
-              />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">工作事項</label>
+            <div className="space-y-2 mb-2">
+              {workItems.map((item) => (
+                <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                  <select
+                    value={item.status}
+                    onChange={(e) => updateWorkItemStatus(item.id, e.target.value as 'pending' | 'processing' | 'completed')}
+                    className="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
+                  >
+                    <option value="pending">待處理</option>
+                    <option value="processing">處理中</option>
+                    <option value="completed">已完成</option>
+                  </select>
+                  <span className="flex-1 text-sm">{item.content}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeWorkItem(item.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">狀態</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newWorkItem}
+                onChange={(e) => setNewWorkItem(e.target.value)}
+                placeholder="新增工作事項..."
+                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
+              />
               <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as typeof status)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
+                value={newWorkItemStatus}
+                onChange={(e) => setNewWorkItemStatus(e.target.value as 'pending' | 'processing' | 'completed')}
+                className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
               >
                 <option value="pending">待處理</option>
                 <option value="processing">處理中</option>
                 <option value="completed">已完成</option>
               </select>
+              <button
+                type="button"
+                onClick={addWorkItem}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
+              >
+                新增
+              </button>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">工作事項</label>
-            <textarea
-              value={task}
-              onChange={(e) => setTask(e.target.value)}
-              rows={3}
-              placeholder="今日完成的事項..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
-              required
-            />
           </div>
 
           <div>
@@ -115,28 +153,6 @@ export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData
               placeholder="對上級或客戶的回覆..."
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">完成日期</label>
-              <input
-                type="date"
-                value={completionDate}
-                onChange={(e) => setCompletionDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">花費時間</label>
-              <input
-                type="text"
-                value={timeSpent}
-                onChange={(e) => setTimeSpent(e.target.value)}
-                placeholder="如：6小時"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
-              />
-            </div>
           </div>
 
           <div>
@@ -154,7 +170,7 @@ export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData
             <button type="button" onClick={onClose} className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg">
               取消
             </button>
-            <button type="submit" disabled={saving} className="px-4 py-2 bg-primary text-white rounded-lg disabled:opacity-50">
+            <button type="submit" disabled={saving || workItems.length === 0} className="px-4 py-2 bg-primary text-white rounded-lg disabled:opacity-50">
               {saving ? '儲存中...' : '儲存'}
             </button>
           </div>
