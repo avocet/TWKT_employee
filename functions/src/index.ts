@@ -167,3 +167,96 @@ export const sendTaskResponseNotification = functions.firestore
 
     return null;
   });
+
+export const sendWorkLogReplyNotification = functions.firestore
+  .document('workLogs/{workLogId}')
+  .onUpdate(async (change, context) => {
+    const beforeData = change.before.data();
+    const afterData = change.after.data();
+
+    if (!beforeData || !afterData) {
+      return null;
+    }
+
+    const beforeItems = beforeData.workItems || [];
+    const afterItems = afterData.workItems || [];
+
+    const newReplies: any[] = [];
+
+    for (let i = 0; i < afterItems.length; i++) {
+      const afterItem = afterItems[i] || {};
+      const beforeItem = beforeItems[i] || {};
+      const beforeReplies = beforeItem.replies || [];
+      const afterReplies = afterItem.replies || [];
+
+      if (afterReplies.length > beforeReplies.length) {
+        const newReply = afterReplies[afterReplies.length - 1];
+        newReplies.push({
+          itemContent: afterItem.content,
+          reply: newReply,
+          isAdminReply: newReply.isAdmin
+        });
+      }
+    }
+
+    if (newReplies.length === 0) {
+      return null;
+    }
+
+    console.log('New work log replies detected:', newReplies.length);
+
+    try {
+      const userDoc = await admin.firestore().collection('users').doc(afterData.userId).get();
+      const userData = userDoc.data();
+      const userEmail = userData?.email;
+
+      const adminsSnapshot = await admin.firestore()
+        .collection('users')
+        .where('role', '==', 'admin')
+        .get();
+
+      const emailsToSend: { email: string; subject: string; html: string }[] = [];
+
+      for (const reply of newReplies) {
+        const subject = reply.isAdminReply 
+          ? `【工作日誌回覆】${afterData.date}`
+          : `【員工回覆】${afterData.date}`;
+
+        const html = `
+          <div style="font-family: 'Microsoft JhengHei', Arial, sans-serif; padding: 20px;">
+            <h2 style="color: #1a73e8;">${reply.isAdminReply ? '主管回覆' : '員工回覆'}工作日誌</h2>
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <p><strong>日期：</strong>${afterData.date}</p>
+              <p><strong>事項：</strong>${reply.itemContent}</p>
+              <p><strong>回覆人：</strong>${reply.reply.byName} (${reply.isAdminReply ? '主管' : '員工'})</p>
+              <p><strong>回覆內容：</strong>${reply.reply.content}</p>
+              <p><strong>回覆時間：</strong>${new Date(reply.reply.at).toLocaleString('zh-TW')}</p>
+            </div>
+            <p style="color: #666; font-size: 12px;">
+              請登入<a href="https://avocet.github.io/TWKT_employee/">阿克索工作日誌系統</a>查看詳情
+            </p>
+          </div>
+        `;
+
+        if (userEmail && !reply.isAdminReply) {
+          emailsToSend.push({ email: userEmail, subject, html });
+        }
+
+        for (const adminDoc of adminsSnapshot.docs) {
+          const adminData = adminDoc.data();
+          if (adminData?.email && reply.isAdminReply) {
+            emailsToSend.push({ email: adminData.email, subject, html });
+          }
+        }
+      }
+
+      for (const emailData of emailsToSend) {
+        console.log('Sending work log reply email to:', emailData.email);
+        await sendEmail(emailData.email, emailData.subject, emailData.html);
+      }
+    } catch (error) {
+      console.error('Error sending work log reply notification:', error);
+    }
+
+    return null;
+  });
