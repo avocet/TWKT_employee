@@ -87,6 +87,8 @@ export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              max={new Date().toISOString().split('T')[0]}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
               required
             />
