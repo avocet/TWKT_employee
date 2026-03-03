@@ -19,6 +19,9 @@ export interface WorkItem {
   id: string;
   content: string;
   status: 'pending' | 'processing' | 'completed';
+  reply?: string;
+  replyAt?: string;
+  repliedBy?: string;
 }
 
 export interface WorkLog {

@@ -28,7 +28,9 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
   const [editingLog, setEditingLog] = useState<WorkLog | null>(null);
   const [filterUserId, setFilterUserId] = useState(isAdmin ? '' : userId);
   const [replyingLog, setReplyingLog] = useState<WorkLog | null>(null);
+  const [replyingItemId, setReplyingItemId] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
+  const [itemReplyContent, setItemReplyContent] = useState('');
   const [updatedWorkItems, setUpdatedWorkItems] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -83,6 +85,28 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
   const handleReply = async () => {
     if (!replyingLog) return;
     
+    // Handle individual item reply
+    if (replyingItemId && itemReplyContent.trim()) {
+      const updatedItems = (replyingLog.workItems || []).map(item => {
+        if (item.id === replyingItemId) {
+          return {
+            ...item,
+            reply: itemReplyContent,
+            replyAt: new Date().toISOString(),
+            repliedBy: userId
+          };
+        }
+        return item;
+      });
+      
+      await updateWorkLog(replyingLog.id, { workItems: updatedItems });
+      await loadData();
+      setReplyingItemId(null);
+      setItemReplyContent('');
+      return;
+    }
+    
+    // Handle log-level reply
     const updateData: Partial<WorkLog> = {
       supervisorReply: replyContent,
       supervisorReplyAt: new Date().toISOString()
@@ -220,11 +244,53 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
 
               <div className="space-y-2 mb-2">
                 {log.workItems?.map((item) => (
-                  <div key={item.id} className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[item.status]}`}>
-                      {statusLabels[item.status]}
-                    </span>
-                    <span className="text-gray-700">{item.content}</span>
+                  <div key={item.id} className="p-2 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[item.status]}`}>
+                        {statusLabels[item.status]}
+                      </span>
+                      <span className="text-gray-700 flex-1">{item.content}</span>
+                      {isAdmin && !item.reply && (
+                        <button
+                          onClick={() => { setReplyingLog(log); setReplyingItemId(item.id); }}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          回覆
+                        </button>
+                      )}
+                    </div>
+                    {item.reply && (
+                      <div className="mt-2 pl-2 border-l-2 border-blue-300">
+                        <p className="text-xs text-blue-600 mb-1">主管回覆</p>
+                        <p className="text-sm text-gray-700">{item.reply}</p>
+                      </div>
+                    )}
+                    {replyingItemId === item.id && (
+                      <div className="mt-2 space-y-2">
+                        <textarea
+                          value={itemReplyContent}
+                          onChange={(e) => setItemReplyContent(e.target.value)}
+                          placeholder="輸入回覆..."
+                          rows={2}
+                          className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleReply}
+                            disabled={!itemReplyContent.trim()}
+                            className="px-2 py-1 bg-primary text-white text-xs rounded disabled:opacity-50"
+                          >
+                            儲存
+                          </button>
+                          <button
+                            onClick={() => { setReplyingItemId(null); setItemReplyContent(''); }}
+                            className="px-2 py-1 text-gray-600 text-xs bg-gray-100 rounded"
+                          >
+                            取消
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -299,7 +365,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                           儲存回覆
                         </button>
                         <button
-                          onClick={() => { setReplyingLog(null); setReplyContent(''); }}
+                          onClick={() => { setReplyingLog(null); setReplyContent(''); setReplyingItemId(null); setUpdatedWorkItems([]); }}
                           className="px-3 py-1 text-gray-600 bg-gray-100 rounded-lg text-sm"
                         >
                           取消
