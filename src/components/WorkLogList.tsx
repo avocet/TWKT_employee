@@ -259,14 +259,12 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                         {statusLabels[item.status]}
                       </span>
                       <span className="text-gray-700 flex-1">{item.content}</span>
-                      {((isAdmin && !item.replies?.some(r => r.isAdmin)) || (!isAdmin && !item.replies?.some(r => !r.isAdmin))) && (
-                        <button
-                          onClick={() => { setReplyingLog(log); setReplyingItemId(item.id); }}
-                          className="text-xs text-primary hover:underline"
-                        >
-                          回覆
-                        </button>
-                      )}
+                      <button
+                        onClick={() => { setReplyingLog(log); setReplyingItemId(item.id); }}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        回覆
+                      </button>
                     </div>
                     {item.replies?.map((reply, idx) => (
                       <div key={idx} className="mt-2 pl-2 border-l-2 border-blue-300">
