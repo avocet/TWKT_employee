@@ -147,7 +147,23 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
           <h3 className="font-medium text-orange-800 mb-2">進行中事項 ({pendingItems.length})</h3>
           <div className="space-y-2">
             {pendingItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-2 text-sm">
+              <div 
+                key={item.id} 
+                onClick={() => {
+                  const log = logs.find(l => l.workItems?.some(wi => wi.id === item.id));
+                  if (log) {
+                    setReplyingLog(log);
+                    // Scroll to the log entry
+                    setTimeout(() => {
+                      const element = document.getElementById(`log-${log.id}`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }, 100);
+                  }
+                }}
+                className="flex items-center gap-2 text-sm cursor-pointer hover:bg-orange-100 p-1 rounded"
+              >
                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[item.status]}`}>
                   {statusLabels[item.status]}
                 </span>
@@ -166,7 +182,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
       ) : (
         <div className="space-y-4">
           {filteredLogs.map(log => (
-            <div key={log.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div key={log.id} id={`log-${log.id}`} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-500">{log.date}</span>
