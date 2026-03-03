@@ -235,18 +235,24 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                 </div>
                 {log.userId === userId && (
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => setEditingLog(log)}
-                      className="text-sm text-blue-600 hover:underline"
-                    >
-                      編輯
-                    </button>
-                    <button
-                      onClick={() => handleDelete(log.id)}
-                      className="text-sm text-red-600 hover:underline"
-                    >
-                      刪除
-                    </button>
+                    {isAdmin || log.date === today ? (
+                      <>
+                        <button
+                          onClick={() => setEditingLog(log)}
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          編輯
+                        </button>
+                        <button
+                          onClick={() => handleDelete(log.id)}
+                          className="text-sm text-red-600 hover:underline"
+                        >
+                          刪除
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-sm text-gray-400">（已鎖定）</span>
+                    )}
                   </div>
                 )}
               </div>
