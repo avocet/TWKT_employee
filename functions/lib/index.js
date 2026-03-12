@@ -150,10 +150,10 @@ exports.sendWorkLogReplyNotification = functions.firestore
     const beforeItems = beforeData.workItems || [];
     const afterItems = afterData.workItems || [];
     const newReplies = [];
-    for (let i = 0; i < afterItems.length; i++) {
-        const afterItem = afterItems[i] || {};
-        const beforeItem = beforeItems[i] || {};
-        const beforeReplies = beforeItem.replies || [];
+    // Compare by item ID instead of index
+    for (const afterItem of afterItems) {
+        const beforeItem = beforeItems.find((item) => item.id === afterItem.id);
+        const beforeReplies = (beforeItem === null || beforeItem === void 0 ? void 0 : beforeItem.replies) || [];
         const afterReplies = afterItem.replies || [];
         if (afterReplies.length > beforeReplies.length) {
             const newReply = afterReplies[afterReplies.length - 1];
@@ -172,12 +172,16 @@ exports.sendWorkLogReplyNotification = functions.firestore
         const userDoc = await admin.firestore().collection('users').doc(afterData.userId).get();
         const userData = userDoc.data();
         const userEmail = userData === null || userData === void 0 ? void 0 : userData.email;
+        console.log('Work log owner email:', userEmail);
         const adminsSnapshot = await admin.firestore()
             .collection('users')
             .where('role', '==', 'admin')
             .get();
+        const adminEmails = adminsSnapshot.docs.map(d => d.data().email).filter(Boolean);
+        console.log('Admin emails:', adminEmails);
         const emailsToSend = [];
         for (const reply of newReplies) {
+            console.log('Processing reply, isAdminReply:', reply.isAdminReply);
             const subject = reply.isAdminReply
                 ? `【工作日誌回覆】${afterData.date}`
                 : `【員工回覆】${afterData.date}`;
@@ -196,13 +200,16 @@ exports.sendWorkLogReplyNotification = functions.firestore
             </p>
           </div>
         `;
-            if (userEmail && !reply.isAdminReply) {
+            // If admin replies, send to work log owner (employee)
+            if (userEmail && reply.isAdminReply) {
                 emailsToSend.push({ email: userEmail, subject, html });
+                console.log('Will send to employee:', userEmail);
             }
-            for (const adminDoc of adminsSnapshot.docs) {
-                const adminData = adminDoc.data();
-                if ((adminData === null || adminData === void 0 ? void 0 : adminData.email) && reply.isAdminReply) {
-                    emailsToSend.push({ email: adminData.email, subject, html });
+            // If employee replies, send to all admins
+            if (!reply.isAdminReply) {
+                for (const adminEmail of adminEmails) {
+                    emailsToSend.push({ email: adminEmail, subject, html });
+                    console.log('Will send to admin:', adminEmail);
                 }
             }
         }

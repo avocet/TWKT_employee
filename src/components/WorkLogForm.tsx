@@ -7,9 +7,10 @@ interface WorkLogFormProps {
   onSubmit: (data: WorkLogFormData) => void | Promise<void>;
   editingLog?: WorkLog | null;
   initialData?: WorkLog;
+  isAdmin?: boolean;
 }
 
-export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData }: WorkLogFormProps) {
+export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData, isAdmin = false }: WorkLogFormProps) {
   const log = editingLog || initialData;
   const [date, setDate] = useState('');
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
@@ -106,7 +107,7 @@ export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData
                   >
                     <option value="pending">待處理</option>
                     <option value="processing">處理中</option>
-                    <option value="completed">已完成</option>
+                    {isAdmin && <option value="completed">已完成</option>}
                   </select>
                   <span className="flex-1 text-sm">{item.content}</span>
                   <button
@@ -134,7 +135,7 @@ export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData
               >
                 <option value="pending">待處理</option>
                 <option value="processing">處理中</option>
-                <option value="completed">已完成</option>
+                {isAdmin && <option value="completed">已完成</option>}
               </select>
               <button
                 type="button"

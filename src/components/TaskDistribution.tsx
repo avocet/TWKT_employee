@@ -348,9 +348,9 @@ function TaskFormModal({ users, onClose, onSubmit }: TaskFormModalProps) {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    const maxSize = 2 * 1024 * 1024;
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert('檔案大小不能超過 2MB');
+      alert('檔案大小不能超過 5MB');
       return;
     }
 

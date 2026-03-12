@@ -79,6 +79,30 @@ export async function addTask(task: any): Promise<Task> {
     }
   });
   
+  if (cleanTask.attachmentFile?.data) {
+    try {
+      const base64Data = cleanTask.attachmentFile.data.split(',')[1];
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: cleanTask.attachmentFile.type });
+      const file = new File([blob], cleanTask.attachmentFile.name, { type: cleanTask.attachmentFile.type });
+      
+      const uploaded = await uploadFile(file);
+      cleanTask.attachmentFile = {
+        name: uploaded.name,
+        url: uploaded.url,
+        size: uploaded.size,
+        type: uploaded.type
+      };
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      delete cleanTask.attachmentFile;
+    }
+  }
+  
   const docRef = await addDoc(collection(db, 'tasks'), {
     ...cleanTask,
     createdAt: new Date().toISOString(),
