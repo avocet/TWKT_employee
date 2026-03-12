@@ -421,6 +421,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                           >
                             <option value="pending">待處理</option>
                             <option value="processing">處理中</option>
+                            <option value="paused">暫停處理</option>
                             <option value="completed">已完成</option>
                           </select>
                         </div>
@@ -551,6 +552,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                             >
                               <option value="pending">待處理</option>
                               <option value="processing">處理中</option>
+                              <option value="paused">暫停處理</option>
                               <option value="completed">已完成</option>
                             </select>
                           </div>
@@ -629,6 +631,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                                 >
                                   <option value="pending">待處理</option>
                                   <option value="processing">處理中</option>
+                                  <option value="paused">暫停處理</option>
                                   <option value="completed">已完成</option>
                                 </select>
                                 <span className="text-sm text-gray-700 flex-1">{item.content}</span>
