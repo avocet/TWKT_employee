@@ -12,12 +12,14 @@ interface WorkLogListProps {
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-700',
   processing: 'bg-blue-100 text-blue-700',
+  paused: 'bg-gray-100 text-gray-700',
   completed: 'bg-green-100 text-green-700',
 };
 
 const statusLabels = {
   pending: '待處理',
   processing: '處理中',
+  paused: '暫停處理',
   completed: '已完成',
 };
 
@@ -31,13 +33,13 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
   const [replyingItemId, setReplyingItemId] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
   const [itemReplyContent, setItemReplyContent] = useState('');
-  const [itemNewStatus, setItemNewStatus] = useState<'pending' | 'processing' | 'completed'>('pending');
+  const [itemNewStatus, setItemNewStatus] = useState<'pending' | 'processing' | 'paused' | 'completed'>('pending');
   const [updatedWorkItems, setUpdatedWorkItems] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
   const [replyingPendingItem, setReplyingPendingItem] = useState<{logId: string; itemId: string} | null>(null);
   const [pendingReplyContent, setPendingReplyContent] = useState('');
-  const [pendingReplyStatus, setPendingReplyStatus] = useState<'pending' | 'processing' | 'completed'>('pending');
+  const [pendingReplyStatus, setPendingReplyStatus] = useState<'pending' | 'processing' | 'paused' | 'completed'>('pending');
   const [showStats, setShowStats] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -414,7 +416,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                           <span className="text-sm text-gray-600">狀態：</span>
                           <select
                             value={pendingReplyStatus}
-                            onChange={(e) => setPendingReplyStatus(e.target.value as 'pending' | 'processing' | 'completed')}
+                            onChange={(e) => setPendingReplyStatus(e.target.value as 'pending' | 'processing' | 'paused' | 'completed')}
                             className="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
                           >
                             <option value="pending">待處理</option>
@@ -544,7 +546,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                             <span className="text-sm text-gray-600">狀態：</span>
                             <select
                               value={itemNewStatus}
-                              onChange={(e) => setItemNewStatus(e.target.value as 'pending' | 'processing' | 'completed')}
+                              onChange={(e) => setItemNewStatus(e.target.value as 'pending' | 'processing' | 'paused' | 'completed')}
                               className="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
                             >
                               <option value="pending">待處理</option>
@@ -613,7 +615,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
                                 <select
                                   value={updatedWorkItems.find(wi => wi.id === item.id)?.status || item.status}
                                   onChange={(e) => {
-                                    const newStatus = e.target.value as 'pending' | 'processing' | 'completed';
+                                    const newStatus = e.target.value as 'pending' | 'processing' | 'paused' | 'completed';
                                     const existing = updatedWorkItems.find(wi => wi.id === item.id);
                                     if (existing) {
                                       setUpdatedWorkItems(updatedWorkItems.map(wi => 

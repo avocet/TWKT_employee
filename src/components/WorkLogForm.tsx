@@ -15,7 +15,7 @@ export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData
   const [date, setDate] = useState('');
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
   const [newWorkItem, setNewWorkItem] = useState('');
-  const [newWorkItemStatus, setNewWorkItemStatus] = useState<'pending' | 'processing' | 'completed'>('pending');
+  const [newWorkItemStatus, setNewWorkItemStatus] = useState<'pending' | 'processing' | 'paused' | 'completed'>('pending');
   const [response, setResponse] = useState('');
   const [problems, setProblems] = useState('');
   const [saving, setSaving] = useState(false);
@@ -50,7 +50,7 @@ export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData
     setWorkItems(workItems.filter(item => item.id !== id));
   };
 
-  const updateWorkItemStatus = (id: string, status: 'pending' | 'processing' | 'completed') => {
+  const updateWorkItemStatus = (id: string, status: 'pending' | 'processing' | 'paused' | 'completed') => {
     setWorkItems(workItems.map(item => 
       item.id === id ? { ...item, status } : item
     ));
@@ -102,11 +102,12 @@ export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData
                 <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
                   <select
                     value={item.status}
-                    onChange={(e) => updateWorkItemStatus(item.id, e.target.value as 'pending' | 'processing' | 'completed')}
+                    onChange={(e) => updateWorkItemStatus(item.id, e.target.value as 'pending' | 'processing' | 'paused' | 'completed')}
                     className="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
                   >
                     <option value="pending">待處理</option>
                     <option value="processing">處理中</option>
+                    <option value="paused">暫停處理</option>
                     {isAdmin && <option value="completed">已完成</option>}
                   </select>
                   <span className="flex-1 text-sm">{item.content}</span>
@@ -130,11 +131,12 @@ export default function WorkLogForm({ onClose, onSubmit, editingLog, initialData
               />
               <select
                 value={newWorkItemStatus}
-                onChange={(e) => setNewWorkItemStatus(e.target.value as 'pending' | 'processing' | 'completed')}
+                onChange={(e) => setNewWorkItemStatus(e.target.value as 'pending' | 'processing' | 'paused' | 'completed')}
                 className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
               >
                 <option value="pending">待處理</option>
                 <option value="processing">處理中</option>
+                <option value="paused">暫停處理</option>
                 {isAdmin && <option value="completed">已完成</option>}
               </select>
               <button

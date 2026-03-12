@@ -12,12 +12,14 @@ interface TaskListProps {
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-700',
   processing: 'bg-blue-100 text-blue-700',
+  paused: 'bg-gray-100 text-gray-700',
   completed: 'bg-green-100 text-green-700',
 };
 
 const statusLabels = {
   pending: '待處理',
   processing: '處理中',
+  paused: '暫停處理',
   completed: '已完成',
 };
 
@@ -59,7 +61,7 @@ export function TaskDistribution({ userId, userName, isAdmin }: TaskListProps) {
   const filteredTasks = filter === 'all' 
     ? tasks 
     : filter === 'inProgress'
-    ? tasks.filter(t => t.status === 'pending' || t.status === 'processing')
+    ? tasks.filter(t => t.status === 'pending' || t.status === 'processing' || t.status === 'paused')
     : tasks.filter(t => t.status === filter);
 
   const sortedTasks = [...filteredTasks].sort((a, b) => 
@@ -85,6 +87,7 @@ export function TaskDistribution({ userId, userName, isAdmin }: TaskListProps) {
             className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
           >
             <option value="inProgress">進行中</option>
+            <option value="paused">暫停處理</option>
             <option value="completed">已完成</option>
             <option value="all">全部</option>
           </select>
@@ -275,6 +278,7 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
                     >
                       <option value="pending">待處理</option>
                       <option value="processing">處理中</option>
+                      <option value="paused">暫停處理</option>
                       <option value="completed">已完成</option>
                     </select>
                   </>

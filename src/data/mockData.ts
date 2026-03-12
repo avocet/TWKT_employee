@@ -292,4 +292,4 @@ export const defaultTasks: Task[] = [
   },
 ];
 
-export const availableStatuses = ['pending', 'processing', 'completed'];
+export const availableStatuses = ['pending', 'processing', 'paused', 'completed'];

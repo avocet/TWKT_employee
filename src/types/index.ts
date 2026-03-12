@@ -26,7 +26,7 @@ export interface WorkItemReply {
 export interface WorkItem {
   id: string;
   content: string;
-  status: 'pending' | 'processing' | 'completed';
+  status: 'pending' | 'processing' | 'paused' | 'completed';
   replies?: WorkItemReply[];
 }
 
@@ -92,7 +92,7 @@ export interface Task {
   assignedTo: string[];
   responses: TaskResponse[];
   completionDate: string;
-  status: 'pending' | 'processing' | 'completed';
+  status: 'pending' | 'processing' | 'paused' | 'completed';
   createdAt: string;
   updatedAt: string;
   addResponse?: TaskResponse;
