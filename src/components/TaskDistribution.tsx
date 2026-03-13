@@ -148,7 +148,6 @@ interface TaskCardProps {
 function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, getUserName }: TaskCardProps) {
   const [showResponse, setShowResponse] = useState(false);
   const [responseText, setResponseText] = useState('');
-  const [completionDate, setCompletionDate] = useState(task.completionDate);
 
   const responses = task.responses || [];
   const canEdit = isAdmin || task.assignedTo.includes(currentUserId);
@@ -166,7 +165,6 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
 
     await onUpdate(task.id, { 
       addResponse: newResponse,
-      completionDate: task.completionDate || completionDate,
       status: 'processing'
     });
     
@@ -264,24 +262,16 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
               />
               <div className="flex gap-3">
                 {isAdmin && (
-                  <>
-                    <input
-                      type="date"
-                      value={completionDate}
-                      onChange={(e) => setCompletionDate(e.target.value)}
-                      className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
-                    />
-                    <select
-                      value={task.status}
-                      onChange={(e) => onUpdate(task.id, { status: e.target.value as Task['status'] })}
-                      className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
-                    >
-                      <option value="pending">待處理</option>
-                      <option value="processing">處理中</option>
-                      <option value="paused">暫停處理</option>
-                      <option value="completed">已完成</option>
-                    </select>
-                  </>
+                  <select
+                    value={task.status}
+                    onChange={(e) => onUpdate(task.id, { status: e.target.value as Task['status'] })}
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                  >
+                    <option value="pending">待處理</option>
+                    <option value="processing">處理中</option>
+                    <option value="paused">暫停處理</option>
+                    <option value="completed">已完成</option>
+                  </select>
                 )}
                 <button
                   onClick={() => setShowResponse(false)}
