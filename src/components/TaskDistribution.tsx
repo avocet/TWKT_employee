@@ -154,6 +154,25 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
   const canEdit = isAdmin || task.assignedTo.includes(currentUserId);
 
   const handleAddResponse = async () => {
+    if (isAdmin) {
+      if (replyStatus !== task.status) {
+        await onUpdate(task.id, { status: replyStatus });
+      }
+      if (responseText.trim()) {
+        const newResponse = {
+          id: Date.now().toString(),
+          content: responseText,
+          by: currentUserId,
+          byName: currentUserName,
+          createdAt: new Date().toISOString()
+        };
+        await onUpdate(task.id, { addResponse: newResponse });
+      }
+      setResponseText('');
+      setShowResponse(false);
+      return;
+    }
+    
     if (!responseText.trim()) return;
     
     const newResponse = {
@@ -166,7 +185,7 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
 
     await onUpdate(task.id, { 
       addResponse: newResponse,
-      status: replyStatus
+      status: 'processing'
     });
     
     setResponseText('');
@@ -282,7 +301,7 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
                 </button>
                 <button
                   onClick={handleAddResponse}
-                  disabled={!responseText.trim()}
+                  disabled={!isAdmin && !responseText.trim()}
                   className="px-3 py-1.5 bg-primary text-white rounded-lg text-sm hover:bg-primary-dark disabled:opacity-50"
                 >
                   送出
