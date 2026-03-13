@@ -148,6 +148,7 @@ interface TaskCardProps {
 function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, getUserName }: TaskCardProps) {
   const [showResponse, setShowResponse] = useState(false);
   const [responseText, setResponseText] = useState('');
+  const [replyStatus, setReplyStatus] = useState(task.status);
 
   const responses = task.responses || [];
   const canEdit = isAdmin || task.assignedTo.includes(currentUserId);
@@ -165,7 +166,7 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
 
     await onUpdate(task.id, { 
       addResponse: newResponse,
-      status: 'processing'
+      status: replyStatus
     });
     
     setResponseText('');
@@ -263,8 +264,8 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
               <div className="flex gap-3">
                 {isAdmin && (
                   <select
-                    value={task.status}
-                    onChange={(e) => onUpdate(task.id, { status: e.target.value as Task['status'] })}
+                    value={replyStatus}
+                    onChange={(e) => setReplyStatus(e.target.value as Task['status'])}
                     className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
                   >
                     <option value="pending">待處理</option>
@@ -274,7 +275,7 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
                   </select>
                 )}
                 <button
-                  onClick={() => setShowResponse(false)}
+                  onClick={() => { setShowResponse(false); setReplyStatus(task.status); }}
                   className="px-3 py-1.5 text-gray-700 bg-gray-100 rounded-lg text-sm"
                 >
                   取消
@@ -290,7 +291,7 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
             </div>
           ) : (
             <button
-              onClick={() => setShowResponse(true)}
+              onClick={() => { setShowResponse(true); setReplyStatus(task.status); }}
               className="text-sm text-primary hover:underline"
             >
               回覆
