@@ -71,9 +71,12 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
       .map(item => ({
         ...item,
         date: log.date,
-        userId: log.userId
+        userId: log.userId,
+        lastReplyAt: item.replies && item.replies.length > 0 
+          ? item.replies[item.replies.length - 1].at 
+          : log.createdAt
       }))
-  );
+  ).sort((a, b) => new Date(b.lastReplyAt).getTime() - new Date(a.lastReplyAt).getTime());
 
   const handleCreate = async (data: WorkLogFormData) => {
     await addWorkLog({ userId, ...data });
