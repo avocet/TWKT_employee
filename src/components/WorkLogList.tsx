@@ -78,6 +78,17 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
       }))
   ).sort((a, b) => new Date(b.lastReplyAt).getTime() - new Date(a.lastReplyAt).getTime());
 
+  const groupedByDate = pendingItems.reduce((groups: Record<string, typeof pendingItems>, item) => {
+    const dateKey = item.date;
+    if (!groups[dateKey]) {
+      groups[dateKey] = [];
+    }
+    groups[dateKey].push(item);
+    return groups;
+  }, {});
+
+  const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
+
   const handleCreate = async (data: WorkLogFormData) => {
     await addWorkLog({ userId, ...data });
     await loadData();
@@ -362,99 +373,106 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
       {pendingItems.length > 0 && (
         <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
           <h3 className="font-medium text-orange-800 mb-2">進行中事項 ({pendingItems.length})</h3>
-          <div className="space-y-2">
-            {pendingItems.map((item) => {
-              const hasReplies = item.replies && item.replies.length > 0;
-              const isExpanded = expandedReplies.has(item.id);
-              const log = logs.find(l => l.workItems?.some(wi => wi.id === item.id));
-              
-              return (
-                <div key={item.id} className="bg-white rounded-lg border border-orange-100">
-                  <div 
-                    className="flex items-center gap-2 text-sm p-2 cursor-pointer hover:bg-orange-100 rounded-t-lg"
-                  >
-                    <button
-                      onClick={(e) => { e.stopPropagation(); toggleReplies(item.id); }}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      <svg className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[item.status]}`}>
-                      {statusLabels[item.status]}
-                    </span>
-                    {isAdmin && (
-                      <span className="text-xs text-gray-500">({getUserName(item.userId)})</span>
-                    )}
-                    <span className="text-gray-700 flex-1">{item.content}</span>
-                    <span className="text-gray-400 text-xs">{item.date}</span>
-                    {hasReplies && (
-                      <span className="text-xs text-gray-400">({item.replies?.length})</span>
-                    )}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setReplyingPendingItem({ logId: log?.id || '', itemId: item.id }); }}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      回覆
-                    </button>
-                  </div>
-                  
-                  {isExpanded && hasReplies && (
-                    <div className="px-2 pb-2 pl-6 space-y-2">
-                      {item.replies?.map((reply, idx) => (
-                        <div key={idx} className="pl-2 border-l-2 border-blue-300">
-                          <p className="text-xs text-blue-600 mb-1">{reply.isAdmin ? '主管回覆' : '員工回覆'} - {reply.byName}</p>
-                          <p className="text-sm text-gray-700">{reply.content}</p>
-                          <p className="text-xs text-gray-400">{new Date(reply.at).toLocaleString('zh-TW')}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {replyingPendingItem?.itemId === item.id && (
-                    <div className="px-2 pb-2 pl-6 space-y-2">
-                      {isAdmin && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600">狀態：</span>
-                          <select
-                            value={pendingReplyStatus}
-                            onChange={(e) => setPendingReplyStatus(e.target.value as 'pending' | 'processing' | 'paused' | 'completed')}
-                            className="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
+          <div className="space-y-4">
+            {sortedDates.map(dateKey => (
+              <div key={dateKey}>
+                <h4 className="text-sm font-medium text-gray-600 mb-2">{dateKey}</h4>
+                <div className="space-y-2">
+                  {groupedByDate[dateKey].map((item) => {
+                    const hasReplies = item.replies && item.replies.length > 0;
+                    const isExpanded = expandedReplies.has(item.id);
+                    const log = logs.find(l => l.workItems?.some(wi => wi.id === item.id));
+                    
+                    return (
+                      <div key={item.id} className="bg-white rounded-lg border border-orange-100">
+                        <div 
+                          className="flex items-center gap-2 text-sm p-2 cursor-pointer hover:bg-orange-100 rounded-t-lg"
+                        >
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleReplies(item.id); }}
+                            className="text-gray-400 hover:text-gray-600"
                           >
-                            <option value="pending">待處理</option>
-                            <option value="processing">處理中</option>
-                            <option value="paused">暫停處理</option>
-                            <option value="completed">已完成</option>
-                          </select>
+                            <svg className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[item.status]}`}>
+                            {statusLabels[item.status]}
+                          </span>
+                          {isAdmin && (
+                            <span className="text-xs text-gray-500">({getUserName(item.userId)})</span>
+                          )}
+                          <span className="text-gray-700 flex-1">{item.content}</span>
+                          <span className="text-gray-400 text-xs">{item.date}</span>
+                          {hasReplies && (
+                            <span className="text-xs text-gray-400">({item.replies?.length})</span>
+                          )}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setReplyingPendingItem({ logId: log?.id || '', itemId: item.id }); }}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            回覆
+                          </button>
                         </div>
-                      )}
-                      <textarea
-                        value={pendingReplyContent}
-                        onChange={(e) => setPendingReplyContent(e.target.value)}
-                        placeholder="輸入回覆..."
-                        rows={2}
-                        className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => { if (log) handlePendingReply(log.id, item.id); }}
-                          className="px-2 py-1 bg-primary text-white text-xs rounded"
-                        >
-                          儲存
-                        </button>
-                        <button
-                          onClick={() => { setReplyingPendingItem(null); setPendingReplyContent(''); setPendingReplyStatus('pending'); }}
-                          className="px-2 py-1 text-gray-600 text-xs bg-gray-100 rounded"
-                        >
-                          取消
-                        </button>
+                        
+                        {isExpanded && hasReplies && (
+                          <div className="px-2 pb-2 pl-6 space-y-2">
+                            {item.replies?.map((reply, idx) => (
+                              <div key={idx} className="pl-2 border-l-2 border-blue-300">
+                                <p className="text-xs text-blue-600 mb-1">{reply.isAdmin ? '主管回覆' : '員工回覆'} - {reply.byName}</p>
+                                <p className="text-sm text-gray-700">{reply.content}</p>
+                                <p className="text-xs text-gray-400">{new Date(reply.at).toLocaleString('zh-TW')}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {replyingPendingItem?.itemId === item.id && (
+                          <div className="px-2 pb-2 pl-6 space-y-2">
+                            {isAdmin && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-600">狀態：</span>
+                                <select
+                                  value={pendingReplyStatus}
+                                  onChange={(e) => setPendingReplyStatus(e.target.value as 'pending' | 'processing' | 'paused' | 'completed')}
+                                  className="px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
+                                >
+                                  <option value="pending">待處理</option>
+                                  <option value="processing">處理中</option>
+                                  <option value="paused">暫停處理</option>
+                                  <option value="completed">已完成</option>
+                                </select>
+                              </div>
+                            )}
+                            <textarea
+                              value={pendingReplyContent}
+                              onChange={(e) => setPendingReplyContent(e.target.value)}
+                              placeholder="輸入回覆..."
+                              rows={2}
+                              className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-primary"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => { if (log) handlePendingReply(log.id, item.id); }}
+                                className="px-2 py-1 bg-primary text-white text-xs rounded"
+                              >
+                                儲存
+                              </button>
+                              <button
+                                onClick={() => { setReplyingPendingItem(null); setPendingReplyContent(''); setPendingReplyStatus('pending'); }}
+                                className="px-2 py-1 text-gray-600 text-xs bg-gray-100 rounded"
+                              >
+                                取消
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       )}
