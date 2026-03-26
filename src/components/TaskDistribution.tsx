@@ -64,9 +64,23 @@ export function TaskDistribution({ userId, userName, isAdmin }: TaskListProps) {
     ? tasks.filter(t => t.status === 'pending' || t.status === 'processing' || t.status === 'paused')
     : tasks.filter(t => t.status === filter);
 
-  const sortedTasks = [...filteredTasks].sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const tasksWithLastResponse = [...filteredTasks].map(task => ({
+    ...task,
+    lastResponseAt: task.responses && task.responses.length > 0 
+      ? task.responses[task.responses.length - 1].createdAt 
+      : task.createdAt
+  })).sort((a, b) => new Date(b.lastResponseAt).getTime() - new Date(a.lastResponseAt).getTime());
+
+  const groupedByDate = tasksWithLastResponse.reduce((groups: Record<string, typeof tasksWithLastResponse>, task) => {
+    const dateKey = new Date(task.lastResponseAt).toISOString().split('T')[0];
+    if (!groups[dateKey]) {
+      groups[dateKey] = [];
+    }
+    groups[dateKey].push(task);
+    return groups;
+  }, {});
+
+  const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
 
   if (loading) {
     return (
@@ -105,22 +119,29 @@ export function TaskDistribution({ userId, userName, isAdmin }: TaskListProps) {
         </div>
       </div>
 
-      {sortedTasks.length === 0 ? (
+      {tasksWithLastResponse.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           <p>暫無交辦事項</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {sortedTasks.map(task => (
-            <TaskCard 
-              key={task.id} 
-              task={task} 
-              isAdmin={isAdmin}
-              currentUserId={userId}
-              currentUserName={userName}
-              onUpdate={handleUpdate}
-              getUserName={getUserName}
-            />
+          {sortedDates.map(dateKey => (
+            <div key={dateKey}>
+              <h4 className="text-sm font-medium text-gray-600 mb-2">{dateKey.replace(/-/g, '/')}</h4>
+              <div className="space-y-4">
+                {groupedByDate[dateKey].map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    isAdmin={isAdmin}
+                    currentUserId={userId}
+                    currentUserName={userName}
+                    onUpdate={handleUpdate}
+                    getUserName={getUserName}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
