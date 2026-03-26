@@ -79,7 +79,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
   ).sort((a, b) => new Date(b.lastReplyAt).getTime() - new Date(a.lastReplyAt).getTime());
 
   const groupedByDate = pendingItems.reduce((groups: Record<string, typeof pendingItems>, item) => {
-    const dateKey = item.date;
+    const dateKey = new Date(item.lastReplyAt).toISOString().split('T')[0];
     if (!groups[dateKey]) {
       groups[dateKey] = [];
     }
@@ -376,7 +376,7 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
           <div className="space-y-4">
             {sortedDates.map(dateKey => (
               <div key={dateKey}>
-                <h4 className="text-sm font-medium text-gray-600 mb-2">{dateKey}</h4>
+                <h4 className="text-sm font-medium text-gray-600 mb-2">{dateKey.replace(/-/g, '/')}</h4>
                 <div className="space-y-2">
                   {groupedByDate[dateKey].map((item) => {
                     const hasReplies = item.replies && item.replies.length > 0;
