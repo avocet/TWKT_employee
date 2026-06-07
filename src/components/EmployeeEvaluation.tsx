@@ -92,7 +92,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const handleSelectEmployee = (employee: User) => {
     setSelectedEmployee(employee);
     loadEvaluation(employee.id);
-    setSelectedMonth('');
+    setSelectedMonth(currentMonthValue);
   };
 
   const handleSelectMonth = (month: string) => {
@@ -221,8 +221,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
         {(() => {
           const monthsWithScores = Object.keys(evaluationData)
             .filter(month => evaluationData[month]?.totalScore > 0)
-            .sort((a, b) => a.localeCompare(b))
-            .slice(0, 6);
+            .sort((a, b) => a.localeCompare(b));
 
           if (monthsWithScores.length === 0) return null;
 
