@@ -31,18 +31,23 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const wheelRef = useRef<HTMLDivElement>(null);
+  const currentMonthValue = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
   useEffect(() => {
-    if (wheelRef.current && selectedMonth) {
-      const items = wheelRef.current.querySelectorAll('.month-item');
-      items.forEach((item, index) => {
-        const opt = getMonthOptions()[index];
-        if (opt?.value === selectedMonth) {
-          item.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (wheelRef.current) {
+      setTimeout(() => {
+        if (wheelRef.current && selectedMonth) {
+          const items = wheelRef.current.querySelectorAll('.month-item');
+          items.forEach((item, index) => {
+            const opt = getMonthOptions()[index];
+            if (opt?.value === selectedMonth) {
+              item.scrollIntoView({ block: 'center', behavior: 'instant' });
+            }
+          });
         }
-      });
+      }, 100);
     }
-  }, [selectedMonth]);
+  }, [selectedMonth, currentMonthValue]);
 
   const employees = users.filter(u => u.role === 'employee');
 
@@ -70,8 +75,6 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
     }
     return months;
   };
-
-  const currentMonthValue = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
   const loadEvaluation = async (userId: string) => {
     setLoading(true);
