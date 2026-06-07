@@ -203,11 +203,12 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
           return (
             <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
               <h4 className="text-sm font-medium text-gray-700 mb-3">每月評核分數</h4>
-              <div className="flex items-end justify-between gap-3 h-32">
+              <div className="flex items-end gap-3 h-32">
                 {monthsWithScores.map(month => {
                   const score = evaluationData[month]?.totalScore || 0;
                   const percentage = (score / 20) * 100;
-                  const monthLabel = month.slice(5) + '月';
+                  const [year, monthNum] = month.split('-');
+                  const monthLabel = `${year}/${monthNum}月`;
 
                   return (
                     <div key={month} className="w-14 flex flex-col items-center">
