@@ -227,9 +227,9 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
           if (monthsWithScores.length === 0) return null;
 
           return (
-            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto">
               <h4 className="text-sm font-medium text-gray-700 mb-3">每月評核分數</h4>
-              <div className="flex items-end gap-3 h-32">
+              <div className="flex items-end gap-3 h-32 min-w-max">
                 {monthsWithScores.map(month => {
                   const score = evaluationData[month]?.totalScore || 0;
                   const percentage = (score / 20) * 100;
