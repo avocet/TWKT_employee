@@ -27,11 +27,12 @@ interface EmployeeEvaluationProps {
 export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const [selectedEmployee, setSelectedEmployee] = useState<User | null>(null);
   const [evaluationData, setEvaluationData] = useState<EvaluationData>({});
-  const [selectedMonth, setSelectedMonth] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const wheelRef = useRef<HTMLDivElement>(null);
   const currentMonthValue = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthValue);
+  const [mountKey, setMountKey] = useState(0);
 
   useEffect(() => {
     if (wheelRef.current) {
@@ -45,9 +46,9 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
             }
           });
         }
-      }, 100);
+      }, 150);
     }
-  }, [selectedMonth, currentMonthValue]);
+  }, [selectedMonth, currentMonthValue, mountKey]);
 
   const employees = users.filter(u => u.role === 'employee');
 
@@ -96,6 +97,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
     setSelectedEmployee(employee);
     loadEvaluation(employee.id);
     setSelectedMonth(currentMonthValue);
+    setMountKey(k => k + 1);
   };
 
   const handleSelectMonth = (month: string) => {
