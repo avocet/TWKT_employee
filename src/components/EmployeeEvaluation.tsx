@@ -393,11 +393,15 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
               className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:border-primary hover:shadow-md transition-all text-left"
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                  <span className="text-lg font-medium text-gray-600">
-                    {employee.name.charAt(0)}
-                  </span>
-                </div>
+                {employee.avatar ? (
+                  <img src={employee.avatar} alt={employee.name} className="w-12 h-12 rounded-full object-cover" />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                    <span className="text-lg font-medium text-gray-600">
+                      {employee.name.charAt(0)}
+                    </span>
+                  </div>
+                )}
                 <div>
                   <p className="font-medium text-gray-900">{employee.name}</p>
                   <p className="text-sm text-gray-500">{employee.department || '未設定部門'}</p>
