@@ -157,6 +157,14 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
     return 'text-gray-400';
   };
 
+  const getScoreBarColor = (score: number) => {
+    if (score >= 16) return 'bg-green-500';
+    if (score >= 12) return 'bg-green-400';
+    if (score >= 8) return 'bg-yellow-400';
+    if (score >= 4) return 'bg-orange-400';
+    return 'bg-red-400';
+  };
+
   if (selectedEmployee) {
     const currentMonthData = evaluationData[selectedMonth];
     const currentTotalScore = currentMonthData?.totalScore || 0;
@@ -183,6 +191,41 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
             {saving ? '儲存中...' : '儲存'}
           </button>
         </div>
+
+        {(() => {
+          const monthsWithScores = Object.keys(evaluationData)
+            .filter(month => evaluationData[month]?.totalScore > 0)
+            .sort((a, b) => b.localeCompare(a))
+            .slice(0, 6);
+
+          if (monthsWithScores.length === 0) return null;
+
+          return (
+            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">每月評核分數</h4>
+              <div className="flex items-end gap-3 h-32">
+                {monthsWithScores.map(month => {
+                  const score = evaluationData[month]?.totalScore || 0;
+                  const percentage = (score / 20) * 100;
+                  const monthLabel = month.slice(5) + '月';
+                  
+                  return (
+                    <div key={month} className="flex-1 flex flex-col items-center">
+                      <div className="relative w-full flex flex-col items-center justify-end h-24">
+                        <div 
+                          className={`w-full rounded-t-md ${getScoreBarColor(score)} transition-all`}
+                          style={{ height: `${percentage}%`, minHeight: score > 0 ? '4px' : '0' }}
+                        />
+                        <span className="absolute top-0 text-xs font-medium text-gray-700">{score}</span>
+                      </div>
+                      <span className="text-xs text-gray-500 mt-1">{monthLabel}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">評核月份</label>
