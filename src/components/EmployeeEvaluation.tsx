@@ -45,8 +45,10 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
     const now = new Date();
     for (let i = 0; i < 12; i++) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const value = date.toISOString().slice(0, 7);
-      const label = `${date.getFullYear()}年${date.getMonth() + 1}月`;
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const value = `${year}-${String(month).padStart(2, '0')}`;
+      const label = `${year}年${month}月`;
       months.push({ value, label });
     }
     return months;
