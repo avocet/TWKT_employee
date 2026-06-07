@@ -99,6 +99,11 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
     setSelectedMonth(month);
   };
 
+  const getLocalDateString = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  };
+
   const handleScoreChange = (itemKey: string, score: number) => {
     if (!selectedMonth) return;
     
@@ -111,8 +116,8 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
           item3: { score: 0, note: '' },
           item4: { score: 0, note: '' },
           totalScore: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: getLocalDateString(),
+          updatedAt: getLocalDateString(),
         };
       }
       
@@ -125,7 +130,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
         total += (itemData[key]?.score || 0);
       }
       itemData.totalScore = total;
-      itemData.updatedAt = new Date().toISOString();
+      itemData.updatedAt = getLocalDateString();
       
       return updated;
     });
@@ -143,14 +148,14 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
           item3: { score: 0, note: '' },
           item4: { score: 0, note: '' },
           totalScore: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: getLocalDateString(),
+          updatedAt: getLocalDateString(),
         };
       }
       
       const itemData = updated[selectedMonth] as any;
       itemData[itemKey] = { ...itemData[itemKey], note };
-      itemData.updatedAt = new Date().toISOString();
+      itemData.updatedAt = getLocalDateString();
       
       return updated;
     });
