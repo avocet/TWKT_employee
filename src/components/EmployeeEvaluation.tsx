@@ -43,13 +43,16 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const getMonthOptions = () => {
     const months = [];
     const now = new Date();
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const value = `${year}-${String(month).padStart(2, '0')}`;
-      const label = `${year}年${month}月`;
-      months.push({ value, label });
+    const currentYear = now.getFullYear();
+    
+    for (let year = 2020; year <= currentYear + 1; year++) {
+      const maxMonth = year === currentYear + 1 ? 1 : 12;
+      const minMonth = year === 2020 ? 1 : 1;
+      for (let month = maxMonth; month >= minMonth; month--) {
+        const value = `${year}-${String(month).padStart(2, '0')}`;
+        const label = `${year}年${month}月`;
+        months.push({ value, label });
+      }
     }
     return months;
   };
