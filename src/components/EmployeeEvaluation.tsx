@@ -197,7 +197,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
         {(() => {
           const monthsWithScores = Object.keys(evaluationData)
             .filter(month => evaluationData[month]?.totalScore > 0)
-            .sort((a, b) => b.localeCompare(a))
+            .sort((a, b) => a.localeCompare(b))
             .slice(0, 6);
 
           if (monthsWithScores.length === 0) return null;
