@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../utils/firebase';
 import type { User } from '../types';
@@ -30,6 +30,19 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const wheelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (wheelRef.current && selectedMonth) {
+      const items = wheelRef.current.querySelectorAll('.month-item');
+      items.forEach((item, index) => {
+        const opt = getMonthOptions()[index];
+        if (opt?.value === selectedMonth) {
+          item.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      });
+    }
+  }, [selectedMonth]);
 
   const employees = users.filter(u => u.role === 'employee');
 
@@ -44,11 +57,12 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
     const months = [];
     const now = new Date();
     const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
     
     for (let year = 2020; year <= currentYear + 1; year++) {
-      const maxMonth = year === currentYear + 1 ? 1 : 12;
+      const maxMonth = year === currentYear + 1 ? currentMonth : 12;
       const minMonth = year === 2020 ? 1 : 1;
-      for (let month = maxMonth; month >= minMonth; month--) {
+      for (let month = minMonth; month <= maxMonth; month++) {
         const value = `${year}-${String(month).padStart(2, '0')}`;
         const label = `${year}年${month}月`;
         months.push({ value, label });
@@ -56,6 +70,8 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
     }
     return months;
   };
+
+  const currentMonthValue = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
   const loadEvaluation = async (userId: string) => {
     setLoading(true);
@@ -235,16 +251,52 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
 
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">評核月份</label>
-          <select
-            value={selectedMonth}
-            onChange={(e) => handleSelectMonth(e.target.value)}
-            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
-          >
-            <option value="">請選擇月份</option>
-            {getMonthOptions().map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+          <div className="relative h-36 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+              <div className="w-full h-10 bg-blue-100 opacity-50 border-y border-blue-200" />
+            </div>
+            <div 
+              ref={wheelRef}
+              className="h-full overflow-y-auto scroll-smooth"
+              onScroll={(e) => {
+                const el = e.target as HTMLElement;
+                const items = el.querySelectorAll('.month-item');
+                items.forEach((item, index) => {
+                  const rect = item.getBoundingClientRect();
+                  const elRect = el.getBoundingClientRect();
+                  const isCenter = rect.top >= elRect.top + 48 && rect.bottom <= elRect.bottom - 48;
+                  (item as HTMLElement).style.opacity = isCenter ? '1' : '0.4';
+                  (item as HTMLElement).style.fontWeight = isCenter ? '600' : '400';
+                  if (isCenter) {
+                    const opt = getMonthOptions()[index];
+                    if (opt) handleSelectMonth(opt.value);
+                  }
+                });
+              }}
+            >
+              <div className="pt-12 pb-12">
+                {getMonthOptions().map(opt => (
+                  <div
+                    key={opt.value}
+                    onClick={() => handleSelectMonth(opt.value)}
+                    className={`month-item h-10 flex items-center justify-center cursor-pointer transition-all duration-200 ${
+                      selectedMonth === opt.value 
+                        ? 'text-primary' 
+                        : opt.value === currentMonthValue
+                          ? 'text-blue-600'
+                          : 'text-gray-500'
+                    }`}
+                  >
+                    {opt.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <style>{`
+            #month-wheel::-webkit-scrollbar { width: 0; }
+            #month-wheel { scrollbar-width: none; -ms-overflow-style: none; }
+          `}</style>
         </div>
 
         {selectedMonth && currentMonthData && currentTotalScore > 0 && (
