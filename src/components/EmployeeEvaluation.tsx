@@ -215,11 +215,11 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
                   return (
                     <div key={month} className="w-14 flex flex-col items-center">
                       <div className="relative w-full flex flex-col items-center justify-end h-24">
+                        <span className="text-xs font-medium text-gray-700 mb-1">{score}</span>
                         <div
                           className={`w-full rounded-t-md ${getScoreBarColor(score)} transition-all`}
                           style={{ height: `${percentage}%`, minHeight: score > 0 ? '4px' : '0' }}
                         />
-                        <span className="absolute top-0 text-xs font-medium text-gray-700">{score}</span>
                       </div>
                       <span className="text-xs text-gray-500 mt-1">{monthLabel}</span>
                     </div>
