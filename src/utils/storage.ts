@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from './firebase';
-import type { WorkLog, Task, Contract, Announcement } from '../types';
+import type { WorkLog, Task, Contract, Announcement, User } from '../types';
 import { defaultContract } from '../data/mockData';
 
 export async function getWorkLogs(userId?: string, isAdmin?: boolean): Promise<WorkLog[]> {
@@ -29,6 +29,16 @@ export async function getWorkLogs(userId?: string, isAdmin?: boolean): Promise<W
     return logs;
   } catch (error) {
     console.error('Error getting work logs:', error);
+    return [];
+  }
+}
+
+export async function getUsers(): Promise<User[]> {
+  try {
+    const snapshot = await getDocs(collection(db, 'users'));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[];
+  } catch (error) {
+    console.error('Error getting users:', error);
     return [];
   }
 }

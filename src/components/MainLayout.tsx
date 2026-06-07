@@ -6,10 +6,11 @@ import ContractSigning from './ContractSigning';
 import { TaskDistribution } from './TaskDistribution';
 import EmployeeAdmin from './EmployeeAdmin';
 import UserSettings from './UserSettings';
+import EmployeeEvaluation from './EmployeeEvaluation';
 import { getAnnouncements, addAnnouncement, deleteAnnouncement } from '../utils/storage';
-import type { Announcement } from '../types';
+import type { Announcement, User } from '../types';
 
-type Tab = 'worklog' | 'contract' | 'tasks' | 'employees' | 'settings';
+type Tab = 'worklog' | 'contract' | 'tasks' | 'employees' | 'settings' | 'evaluation';
 
 export default function MainLayout() {
   const { user, logout } = useAuth();
@@ -18,6 +19,7 @@ export default function MainLayout() {
   const [showAnnouncements, setShowAnnouncements] = useState(false);
   const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
   const [newAnnouncement, setNewAnnouncement] = useState({ title: '', content: '' });
+  const [users, setUsers] = useState<User[]>([]);
 
   if (!user) return null;
 
@@ -25,11 +27,18 @@ export default function MainLayout() {
 
   useEffect(() => {
     loadAnnouncements();
+    loadUsers();
   }, []);
 
   const loadAnnouncements = async () => {
     const data = await getAnnouncements();
     setAnnouncements(data);
+  };
+
+  const loadUsers = async () => {
+    const { getUsers } = await import('../utils/storage');
+    const data = await getUsers();
+    setUsers(data);
   };
 
   const handleAddAnnouncement = async () => {
@@ -179,7 +188,21 @@ export default function MainLayout() {
                 </svg>
               }
             >
-              勞動契約
+             勞動契約
+            </NavButton>
+          )}
+
+          {isAdmin && (
+            <NavButton 
+              active={activeTab === 'evaluation'} 
+              onClick={() => setActiveTab('evaluation')}
+              icon={
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              }
+            >
+              員工評核
             </NavButton>
           )}
 
@@ -239,6 +262,10 @@ export default function MainLayout() {
 
         {activeTab === 'employees' && isAdmin && (
           <EmployeeAdmin />
+        )}
+
+        {activeTab === 'evaluation' && isAdmin && (
+          <EmployeeEvaluation users={users} />
         )}
 
         {activeTab === 'settings' && (
