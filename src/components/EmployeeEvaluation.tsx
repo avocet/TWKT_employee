@@ -35,6 +35,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const [mountKey, setMountKey] = useState(0);
   const [workLogCount, setWorkLogCount] = useState(0);
   const [taskResponseCount, setTaskResponseCount] = useState(0);
+  const [workLogReplyCount, setWorkLogReplyCount] = useState(0);
 
   useEffect(() => {
     if (wheelRef.current) {
@@ -106,12 +107,15 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
       const workLogsSnapshot = await getDocs(
         query(
           collection(db, 'workLogs'),
-          where('userId', '==', selectedEmployee.id),
-          where('date', '>=', startDate),
-          where('date', '<=', endDate)
+          where('userId', '==', selectedEmployee.id)
         )
       );
-      setWorkLogCount(workLogsSnapshot.size);
+
+      const workLogsInMonth = workLogsSnapshot.docs.filter(doc => {
+        const date = doc.data().date;
+        return date >= startDate && date <= endDate;
+      });
+      setWorkLogCount(workLogsInMonth.length);
 
       const tasksSnapshot = await getDocs(
         query(
@@ -130,6 +134,20 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
         });
       });
       setTaskResponseCount(responseCount);
+
+      let workLogReplyCount = 0;
+      workLogsSnapshot.docs.forEach(doc => {
+        const workItems = doc.data().workItems || [];
+        workItems.forEach((item: any) => {
+          const replies = item.replies || [];
+          replies.forEach((reply: any) => {
+            if (reply.byName === selectedEmployee.name && reply.at && reply.at.startsWith(selectedMonth)) {
+              workLogReplyCount++;
+            }
+          });
+        });
+      });
+      setWorkLogReplyCount(workLogReplyCount);
     };
 
     loadStats();
@@ -352,7 +370,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
 
         {selectedEmployee && selectedMonth && (
           <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <p className="text-2xl font-bold text-primary">{workLogCount}</p>
                 <p className="text-sm text-gray-600">員工日誌</p>
@@ -360,6 +378,10 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
               <div>
                 <p className="text-2xl font-bold text-primary">{taskResponseCount}</p>
                 <p className="text-sm text-gray-600">回應交辦</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary">{workLogReplyCount}</p>
+                <p className="text-sm text-gray-600">回應日誌</p>
               </div>
             </div>
           </div>
