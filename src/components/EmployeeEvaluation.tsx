@@ -35,7 +35,9 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const [mountKey, setMountKey] = useState(0);
   const [workLogCount, setWorkLogCount] = useState(0);
   const [taskResponseCount, setTaskResponseCount] = useState(0);
+  const [taskResponseItems, setTaskResponseItems] = useState(0);
   const [workLogReplyCount, setWorkLogReplyCount] = useState(0);
+  const [workLogReplyItems, setWorkLogReplyItems] = useState(0);
   const [completedCount, setCompletedCount] = useState(0);
   const [completedList, setCompletedList] = useState<{type: string, title: string, date: string, completedAt: string}[]>([]);
   const [showCompletedModal, setShowCompletedModal] = useState(false);
@@ -128,17 +130,21 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
       );
 
       let responseCount = 0;
+      const responseTaskIds = new Set<string>();
       tasksSnapshot.docs.forEach(doc => {
         const responses = doc.data().responses || [];
         responses.forEach((r: any) => {
           if (r.byName === selectedEmployee.name && r.createdAt && r.createdAt.startsWith(selectedMonth)) {
             responseCount++;
+            responseTaskIds.add(doc.id);
           }
         });
       });
       setTaskResponseCount(responseCount);
+      setTaskResponseItems(responseTaskIds.size);
 
       let workLogReplyCount = 0;
+      const responseWorkItemIds = new Set<string>();
       workLogsSnapshot.docs.forEach(doc => {
         const workItems = doc.data().workItems || [];
         workItems.forEach((item: any) => {
@@ -146,11 +152,13 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
           replies.forEach((reply: any) => {
             if (reply.byName === selectedEmployee.name && reply.at && reply.at.startsWith(selectedMonth)) {
               workLogReplyCount++;
+              responseWorkItemIds.add(item.id);
             }
           });
         });
       });
       setWorkLogReplyCount(workLogReplyCount);
+      setWorkLogReplyItems(responseWorkItemIds.size);
 
       let completed = 0;
       const completedItems: {type: string, title: string, date: string, completedAt: string}[] = [];
@@ -422,11 +430,15 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
                 <p className="text-sm text-gray-600">員工日誌</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary">{taskResponseCount}</p>
+                <p className="text-2xl font-bold text-primary">
+                  {taskResponseCount}<span className="text-base font-normal text-gray-400">/{taskResponseItems}</span>
+                </p>
                 <p className="text-sm text-gray-600">回應交辦</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary">{workLogReplyCount}</p>
+                <p className="text-2xl font-bold text-primary">
+                  {workLogReplyCount}<span className="text-base font-normal text-gray-400">/{workLogReplyItems}</span>
+                </p>
                 <p className="text-sm text-gray-600">回應日誌</p>
               </div>
               <div
