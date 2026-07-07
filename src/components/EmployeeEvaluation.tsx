@@ -159,28 +159,34 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
         if (date >= startDate && date <= endDate) {
           const workItems = doc.data().workItems || [];
           workItems.forEach((item: any) => {
-            if (item.status === 'completed' && item.completedAt && item.completedAt.startsWith(selectedMonth)) {
-              completed++;
-              completedItems.push({
-                type: '工作日誌',
-                title: item.content,
-                date: date,
-                completedAt: item.completedAt
-              });
+            if (item.status === 'completed') {
+              const completedTime = item.completedAt || item.updatedAt || item.createdAt || date;
+              if (completedTime.startsWith(selectedMonth)) {
+                completed++;
+                completedItems.push({
+                  type: '工作日誌',
+                  title: item.content,
+                  date: date,
+                  completedAt: completedTime
+                });
+              }
             }
           });
         }
       });
       tasksSnapshot.docs.forEach(doc => {
         const taskData = doc.data();
-        if (taskData.status === 'completed' && taskData.completedAt && taskData.completedAt.startsWith(selectedMonth)) {
-          completed++;
-          completedItems.push({
-            type: '交辦事項',
-            title: taskData.title,
-            date: taskData.completionDate || taskData.createdAt,
-            completedAt: taskData.completedAt
-          });
+        if (taskData.status === 'completed') {
+          const completedTime = taskData.completedAt || taskData.updatedAt || taskData.createdAt;
+          if (completedTime.startsWith(selectedMonth)) {
+            completed++;
+            completedItems.push({
+              type: '交辦事項',
+              title: taskData.title,
+              date: taskData.completionDate || taskData.createdAt,
+              completedAt: completedTime
+            });
+          }
         }
       });
       console.log('Completed check - workLogs:', completed, 'items:', completedItems);
