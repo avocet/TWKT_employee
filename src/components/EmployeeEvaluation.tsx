@@ -36,11 +36,15 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const [workLogCount, setWorkLogCount] = useState(0);
   const [taskResponseCount, setTaskResponseCount] = useState(0);
   const [taskResponseItems, setTaskResponseItems] = useState(0);
+  const [taskResponseList, setTaskResponseList] = useState<{id: string, title: string, date: string}[]>([]);
   const [workLogReplyCount, setWorkLogReplyCount] = useState(0);
   const [workLogReplyItems, setWorkLogReplyItems] = useState(0);
+  const [workLogReplyList, setWorkLogReplyList] = useState<{id: string, title: string, date: string, logDate: string}[]>([]);
   const [completedCount, setCompletedCount] = useState(0);
   const [completedList, setCompletedList] = useState<{type: string, title: string, date: string, completedAt: string}[]>([]);
   const [showCompletedModal, setShowCompletedModal] = useState(false);
+  const [showTaskResponseModal, setShowTaskResponseModal] = useState(false);
+  const [showWorkLogReplyModal, setShowWorkLogReplyModal] = useState(false);
 
   useEffect(() => {
     if (wheelRef.current) {
@@ -131,34 +135,59 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
 
       let responseCount = 0;
       const responseTaskIds = new Set<string>();
+      const responseTaskList: {id: string, title: string, date: string}[] = [];
       tasksSnapshot.docs.forEach(doc => {
-        const responses = doc.data().responses || [];
+        const taskData = doc.data();
+        const responses = taskData.responses || [];
+        let hasResponse = false;
         responses.forEach((r: any) => {
           if (r.byName === selectedEmployee.name && r.createdAt && r.createdAt.startsWith(selectedMonth)) {
             responseCount++;
-            responseTaskIds.add(doc.id);
+            hasResponse = true;
           }
         });
+        if (hasResponse && !responseTaskIds.has(doc.id)) {
+          responseTaskIds.add(doc.id);
+          responseTaskList.push({
+            id: doc.id,
+            title: taskData.title,
+            date: taskData.completionDate || taskData.createdAt
+          });
+        }
       });
       setTaskResponseCount(responseCount);
       setTaskResponseItems(responseTaskIds.size);
+      setTaskResponseList(responseTaskList);
 
       let workLogReplyCount = 0;
       const responseWorkItemIds = new Set<string>();
+      const responseWorkItemList: {id: string, title: string, date: string, logDate: string}[] = [];
       workLogsSnapshot.docs.forEach(doc => {
+        const logDate = doc.data().date;
         const workItems = doc.data().workItems || [];
         workItems.forEach((item: any) => {
           const replies = item.replies || [];
+          let hasResponse = false;
           replies.forEach((reply: any) => {
             if (reply.byName === selectedEmployee.name && reply.at && reply.at.startsWith(selectedMonth)) {
               workLogReplyCount++;
-              responseWorkItemIds.add(item.id);
+              hasResponse = true;
             }
           });
+          if (hasResponse && !responseWorkItemIds.has(item.id)) {
+            responseWorkItemIds.add(item.id);
+            responseWorkItemList.push({
+              id: item.id,
+              title: item.content,
+              date: replies.find((r: any) => r.byName === selectedEmployee.name)?.at || '',
+              logDate: logDate
+            });
+          }
         });
       });
       setWorkLogReplyCount(workLogReplyCount);
       setWorkLogReplyItems(responseWorkItemIds.size);
+      setWorkLogReplyList(responseWorkItemList);
 
       let completed = 0;
       const completedItems: {type: string, title: string, date: string, completedAt: string}[] = [];
@@ -429,13 +458,19 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
                 <p className="text-2xl font-bold text-primary">{workLogCount}</p>
                 <p className="text-sm text-gray-600">員工日誌</p>
               </div>
-              <div>
+              <div
+                className="cursor-pointer hover:bg-gray-100 rounded-lg p-2 -m-2 transition-colors"
+                onClick={() => taskResponseItems > 0 && setShowTaskResponseModal(true)}
+              >
                 <p className="text-2xl font-bold text-primary">
                   {taskResponseCount}<span className="text-base font-normal text-gray-400">/{taskResponseItems}</span>
                 </p>
                 <p className="text-sm text-gray-600">回應交辦</p>
               </div>
-              <div>
+              <div
+                className="cursor-pointer hover:bg-gray-100 rounded-lg p-2 -m-2 transition-colors"
+                onClick={() => workLogReplyItems > 0 && setShowWorkLogReplyModal(true)}
+              >
                 <p className="text-2xl font-bold text-primary">
                   {workLogReplyCount}<span className="text-base font-normal text-gray-400">/{workLogReplyItems}</span>
                 </p>
@@ -480,6 +515,66 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
                           </span>
                         </div>
                         <p className="text-sm text-gray-800">{item.title}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showTaskResponseModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowTaskResponseModal(false)} />
+            <div className="relative bg-white rounded-xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white">
+                <h2 className="text-lg font-semibold">回應的交辦事項</h2>
+                <button onClick={() => setShowTaskResponseModal(false)} className="p-1 text-gray-400 hover:text-gray-600">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-6">
+                {taskResponseList.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">無回應</p>
+                ) : (
+                  <div className="space-y-3">
+                    {taskResponseList.map((item, index) => (
+                      <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-800">{item.title}</p>
+                        <p className="text-xs text-gray-500 mt-1">完成日期: {item.date}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showWorkLogReplyModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowWorkLogReplyModal(false)} />
+            <div className="relative bg-white rounded-xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white">
+                <h2 className="text-lg font-semibold">回應的工作日誌項目</h2>
+                <button onClick={() => setShowWorkLogReplyModal(false)} className="p-1 text-gray-400 hover:text-gray-600">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-6">
+                {workLogReplyList.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">無回應</p>
+                ) : (
+                  <div className="space-y-3">
+                    {workLogReplyList.map((item, index) => (
+                      <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-800">{item.title}</p>
+                        <p className="text-xs text-gray-500 mt-1">日誌日期: {item.logDate}</p>
                       </div>
                     ))}
                   </div>
