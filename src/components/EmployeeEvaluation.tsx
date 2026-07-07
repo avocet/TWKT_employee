@@ -403,52 +403,37 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
 
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">評核月份</label>
-          <div className="relative h-36 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-              <div className="w-full h-10 bg-blue-100 opacity-50 border-y border-blue-200" />
-            </div>
-            <div 
-              ref={wheelRef}
-              className="h-full overflow-y-auto scroll-smooth"
-              onScroll={(e) => {
-                const el = e.target as HTMLElement;
-                const items = el.querySelectorAll('.month-item');
-                items.forEach((item, index) => {
-                  const rect = item.getBoundingClientRect();
-                  const elRect = el.getBoundingClientRect();
-                  const isCenter = rect.top >= elRect.top + 48 && rect.bottom <= elRect.bottom - 48;
-                  (item as HTMLElement).style.opacity = isCenter ? '1' : '0.4';
-                  (item as HTMLElement).style.fontWeight = isCenter ? '600' : '400';
-                  if (isCenter) {
-                    const opt = getMonthOptions()[index];
-                    if (opt) handleSelectMonth(opt.value);
-                  }
-                });
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={() => {
+                const [year, month] = selectedMonth.split('-').map(Number);
+                const date = new Date(year, month - 2, 1);
+                const newMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                handleSelectMonth(newMonth);
               }}
+              className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors"
             >
-              <div className="pt-12 pb-12">
-                {getMonthOptions().map(opt => (
-                  <div
-                    key={opt.value}
-                    onClick={() => handleSelectMonth(opt.value)}
-                    className={`month-item h-10 flex items-center justify-center cursor-pointer transition-all duration-200 ${
-                      selectedMonth === opt.value 
-                        ? 'text-primary' 
-                        : opt.value === currentMonthValue
-                          ? 'text-blue-600'
-                          : 'text-gray-500'
-                    }`}
-                  >
-                    {opt.label}
-                  </div>
-                ))}
-              </div>
-            </div>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <span className="text-xl font-semibold text-gray-800 min-w-[120px] text-center">{selectedMonth}</span>
+            <button
+              onClick={() => {
+                const [year, month] = selectedMonth.split('-').map(Number);
+                const date = new Date(year, month, 1);
+                const newMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                if (newMonth <= currentMonthValue) {
+                  handleSelectMonth(newMonth);
+                }
+              }}
+              className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
-          <style>{`
-            #month-wheel::-webkit-scrollbar { width: 0; }
-            #month-wheel { scrollbar-width: none; -ms-overflow-style: none; }
-          `}</style>
         </div>
 
         {selectedEmployee && selectedMonth && (
