@@ -355,11 +355,11 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
                 <p className="text-2xl font-bold text-primary">{workLogCount}</p>
-                <p className="text-sm text-gray-600">本月員工日誌</p>
+                <p className="text-sm text-gray-600">員工日誌</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-primary">{taskResponseCount}</p>
-                <p className="text-sm text-gray-600">本月回應交辦</p>
+                <p className="text-sm text-gray-600">回應交辦</p>
               </div>
             </div>
           </div>
