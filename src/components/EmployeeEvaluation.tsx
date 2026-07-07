@@ -156,17 +156,16 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
         if (date >= startDate && date <= endDate) {
           const workItems = doc.data().workItems || [];
           workItems.forEach((item: any) => {
-            if (item.status === 'completed') completed++;
+            if (item.status === 'completed' && item.completedAt && item.completedAt.startsWith(selectedMonth)) {
+              completed++;
+            }
           });
         }
       });
       tasksSnapshot.docs.forEach(doc => {
         const taskData = doc.data();
-        if (taskData.status === 'completed') {
-          const createdAt = taskData.createdAt || '';
-          if (createdAt.startsWith(selectedMonth)) {
-            completed++;
-          }
+        if (taskData.status === 'completed' && taskData.completedAt && taskData.completedAt.startsWith(selectedMonth)) {
+          completed++;
         }
       });
       setCompletedCount(completed);

@@ -164,10 +164,15 @@ export default function WorkLogList({ userId, isAdmin }: WorkLogListProps) {
       
       const updatedItems = (replyingLog.workItems || []).map(item => {
         if (item.id === replyingItemId) {
+          const now = new Date().toISOString();
+          const adminName = users.find(u => u.id === userId)?.name || '未知';
+          const newStatus = isAdmin ? itemNewStatus : item.status;
           return {
             ...item,
             replies: [...(item.replies || []), newReply],
-            status: isAdmin ? itemNewStatus : item.status
+            status: newStatus,
+            completedAt: newStatus === 'completed' ? now : (item.status === 'completed' ? item.completedAt : undefined),
+            completedBy: newStatus === 'completed' ? adminName : (item.status === 'completed' ? item.completedBy : undefined)
           };
         }
         return item;

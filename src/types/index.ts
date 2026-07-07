@@ -28,6 +28,8 @@ export interface WorkItem {
   content: string;
   status: 'pending' | 'processing' | 'paused' | 'completed';
   replies?: WorkItemReply[];
+  completedAt?: string;
+  completedBy?: string;
 }
 
 export interface WorkLog {
@@ -98,6 +100,8 @@ export interface Task {
   addResponse?: TaskResponse;
   response?: string;
   responseBy?: string;
+  completedAt?: string;
+  completedBy?: string;
 }
 
 export type TaskFormData = Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'addResponse'> & { responses?: TaskResponse[] };

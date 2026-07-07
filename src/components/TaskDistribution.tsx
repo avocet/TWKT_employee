@@ -177,7 +177,12 @@ function TaskCard({ task, isAdmin, currentUserId, currentUserName, onUpdate, get
   const handleAddResponse = async () => {
     if (isAdmin) {
       if (replyStatus !== task.status) {
-        await onUpdate(task.id, { status: replyStatus });
+        const updateData: any = { status: replyStatus };
+        if (replyStatus === 'completed') {
+          updateData.completedAt = new Date().toISOString();
+          updateData.completedBy = currentUserName;
+        }
+        await onUpdate(task.id, updateData);
       }
       if (responseText.trim()) {
         const newResponse = {
