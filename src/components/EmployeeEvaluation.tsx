@@ -159,13 +159,13 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
         if (date >= startDate && date <= endDate) {
           const workItems = doc.data().workItems || [];
           workItems.forEach((item: any) => {
-            if (item.status === 'completed') {
+            if (item.status === 'completed' && item.completedAt && item.completedAt.startsWith(selectedMonth)) {
               completed++;
               completedItems.push({
                 type: '工作日誌',
                 title: item.content,
                 date: date,
-                completedAt: item.completedAt || item.updatedAt || date
+                completedAt: item.completedAt
               });
             }
           });
@@ -173,13 +173,13 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
       });
       tasksSnapshot.docs.forEach(doc => {
         const taskData = doc.data();
-        if (taskData.status === 'completed') {
+        if (taskData.status === 'completed' && taskData.completedAt && taskData.completedAt.startsWith(selectedMonth)) {
           completed++;
           completedItems.push({
             type: '交辦事項',
             title: taskData.title,
             date: taskData.completionDate || taskData.createdAt,
-            completedAt: taskData.completedAt || taskData.updatedAt || taskData.createdAt
+            completedAt: taskData.completedAt
           });
         }
       });
