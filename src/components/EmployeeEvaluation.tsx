@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, getDocs, query, collection, where } from 'firebase/firestore';
 import { db } from '../utils/firebase';
 import type { User } from '../types';
 
@@ -33,6 +33,8 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const currentMonthValue = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   const [selectedMonth, setSelectedMonth] = useState(currentMonthValue);
   const [mountKey, setMountKey] = useState(0);
+  const [workLogCount, setWorkLogCount] = useState(0);
+  const [taskResponseCount, setTaskResponseCount] = useState(0);
 
   useEffect(() => {
     if (wheelRef.current) {
@@ -92,6 +94,46 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (!selectedEmployee || !selectedMonth) return;
+
+    const loadStats = async () => {
+      const [year, month] = selectedMonth.split('-');
+      const startDate = `${year}-${month}-01`;
+      const endDate = `${year}-${month}-31`;
+
+      const workLogsSnapshot = await getDocs(
+        query(
+          collection(db, 'workLogs'),
+          where('userId', '==', selectedEmployee.id),
+          where('date', '>=', startDate),
+          where('date', '<=', endDate)
+        )
+      );
+      setWorkLogCount(workLogsSnapshot.size);
+
+      const tasksSnapshot = await getDocs(
+        query(
+          collection(db, 'tasks'),
+          where('assignedTo', 'array-contains', selectedEmployee.id)
+        )
+      );
+
+      let responseCount = 0;
+      tasksSnapshot.docs.forEach(doc => {
+        const responses = doc.data().responses || [];
+        responses.forEach((r: any) => {
+          if (r.by === selectedEmployee.name && r.createdAt && r.createdAt.startsWith(selectedMonth)) {
+            responseCount++;
+          }
+        });
+      });
+      setTaskResponseCount(responseCount);
+    };
+
+    loadStats();
+  }, [selectedEmployee, selectedMonth]);
 
   const handleSelectEmployee = (employee: User) => {
     setSelectedEmployee(employee);
@@ -307,6 +349,21 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
             #month-wheel { scrollbar-width: none; -ms-overflow-style: none; }
           `}</style>
         </div>
+
+        {selectedEmployee && selectedMonth && (
+          <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-bold text-primary">{workLogCount}</p>
+                <p className="text-sm text-gray-600">本月員工日誌</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary">{taskResponseCount}</p>
+                <p className="text-sm text-gray-600">本月回應交辦</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {selectedMonth && currentMonthData && currentTotalScore > 0 && (
           <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
