@@ -155,13 +155,15 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
       let completed = 0;
       const completedItems: {type: string, title: string, date: string, completedAt: string}[] = [];
       workLogsSnapshot.docs.forEach(doc => {
-        const date = doc.data().date;
+        const logData = doc.data();
+        const date = logData.date;
+        const logUpdatedAt = logData.updatedAt || logData.createdAt || date;
         if (date >= startDate && date <= endDate) {
-          const workItems = doc.data().workItems || [];
+          const workItems = logData.workItems || [];
           workItems.forEach((item: any) => {
             if (item.status === 'completed') {
-              const completedTime = item.completedAt || item.updatedAt || item.createdAt || date;
-              if (completedTime.startsWith(selectedMonth)) {
+              const completedTime = item.completedAt || logUpdatedAt;
+              if (completedTime && completedTime.startsWith(selectedMonth)) {
                 completed++;
                 completedItems.push({
                   type: '工作日誌',
@@ -178,7 +180,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
         const taskData = doc.data();
         if (taskData.status === 'completed') {
           const completedTime = taskData.completedAt || taskData.updatedAt || taskData.createdAt;
-          if (completedTime.startsWith(selectedMonth)) {
+          if (completedTime && completedTime.startsWith(selectedMonth)) {
             completed++;
             completedItems.push({
               type: '交辦事項',
