@@ -124,7 +124,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
       tasksSnapshot.docs.forEach(doc => {
         const responses = doc.data().responses || [];
         responses.forEach((r: any) => {
-          if (r.by === selectedEmployee.name && r.createdAt && r.createdAt.startsWith(selectedMonth)) {
+          if (r.byName === selectedEmployee.name && r.createdAt && r.createdAt.startsWith(selectedMonth)) {
             responseCount++;
           }
         });
