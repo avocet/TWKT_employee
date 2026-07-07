@@ -36,6 +36,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const [workLogCount, setWorkLogCount] = useState(0);
   const [taskResponseCount, setTaskResponseCount] = useState(0);
   const [workLogReplyCount, setWorkLogReplyCount] = useState(0);
+  const [completedCount, setCompletedCount] = useState(0);
 
   useEffect(() => {
     if (wheelRef.current) {
@@ -148,6 +149,22 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
         });
       });
       setWorkLogReplyCount(workLogReplyCount);
+
+      let completed = 0;
+      workLogsSnapshot.docs.forEach(doc => {
+        const date = doc.data().date;
+        if (date >= startDate && date <= endDate) {
+          const workItems = doc.data().workItems || [];
+          workItems.forEach((item: any) => {
+            if (item.status === 'completed') completed++;
+          });
+        }
+      });
+      tasksSnapshot.docs.forEach(doc => {
+        const taskData = doc.data();
+        if (taskData.status === 'completed') completed++;
+      });
+      setCompletedCount(completed);
     };
 
     loadStats();
@@ -370,7 +387,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
 
         {selectedEmployee && selectedMonth && (
           <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-2xl font-bold text-primary">{workLogCount}</p>
                 <p className="text-sm text-gray-600">員工日誌</p>
@@ -382,6 +399,10 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
               <div>
                 <p className="text-2xl font-bold text-primary">{workLogReplyCount}</p>
                 <p className="text-sm text-gray-600">回應日誌</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary">{completedCount}</p>
+                <p className="text-sm text-gray-600">已完成</p>
               </div>
             </div>
           </div>
