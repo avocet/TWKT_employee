@@ -37,6 +37,8 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
   const [taskResponseCount, setTaskResponseCount] = useState(0);
   const [workLogReplyCount, setWorkLogReplyCount] = useState(0);
   const [completedCount, setCompletedCount] = useState(0);
+  const [completedList, setCompletedList] = useState<{type: string, title: string, date: string, completedAt: string}[]>([]);
+  const [showCompletedModal, setShowCompletedModal] = useState(false);
 
   useEffect(() => {
     if (wheelRef.current) {
@@ -151,6 +153,7 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
       setWorkLogReplyCount(workLogReplyCount);
 
       let completed = 0;
+      const completedItems: {type: string, title: string, date: string, completedAt: string}[] = [];
       workLogsSnapshot.docs.forEach(doc => {
         const date = doc.data().date;
         if (date >= startDate && date <= endDate) {
@@ -158,6 +161,12 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
           workItems.forEach((item: any) => {
             if (item.status === 'completed' && item.completedAt && item.completedAt.startsWith(selectedMonth)) {
               completed++;
+              completedItems.push({
+                type: '工作日誌',
+                title: item.content,
+                date: date,
+                completedAt: item.completedAt
+              });
             }
           });
         }
@@ -166,9 +175,16 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
         const taskData = doc.data();
         if (taskData.status === 'completed' && taskData.completedAt && taskData.completedAt.startsWith(selectedMonth)) {
           completed++;
+          completedItems.push({
+            type: '交辦事項',
+            title: taskData.title,
+            date: taskData.completionDate || taskData.createdAt,
+            completedAt: taskData.completedAt
+          });
         }
       });
       setCompletedCount(completed);
+      setCompletedList(completedItems);
     };
 
     loadStats();
@@ -404,9 +420,49 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
                 <p className="text-2xl font-bold text-primary">{workLogReplyCount}</p>
                 <p className="text-sm text-gray-600">回應日誌</p>
               </div>
-              <div>
+              <div
+                className="cursor-pointer hover:bg-gray-100 rounded-lg p-2 -m-2 transition-colors"
+                onClick={() => completedCount > 0 && setShowCompletedModal(true)}
+              >
                 <p className="text-2xl font-bold text-primary">{completedCount}</p>
                 <p className="text-sm text-gray-600">已完成</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showCompletedModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowCompletedModal(false)} />
+            <div className="relative bg-white rounded-xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white">
+                <h2 className="text-lg font-semibold">已完成項目</h2>
+                <button onClick={() => setShowCompletedModal(false)} className="p-1 text-gray-400 hover:text-gray-600">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-6">
+                {completedList.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">無已完成項目</p>
+                ) : (
+                  <div className="space-y-3">
+                    {completedList.map((item, index) => (
+                      <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs px-2 py-0.5 rounded ${item.type === '工作日誌' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                            {item.type}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            完成於 {new Date(item.completedAt).toLocaleString('zh-TW')}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-800">{item.title}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
