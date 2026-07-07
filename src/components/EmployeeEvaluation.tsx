@@ -162,7 +162,12 @@ export default function EmployeeEvaluation({ users }: EmployeeEvaluationProps) {
       });
       tasksSnapshot.docs.forEach(doc => {
         const taskData = doc.data();
-        if (taskData.status === 'completed') completed++;
+        if (taskData.status === 'completed') {
+          const createdAt = taskData.createdAt || '';
+          if (createdAt.startsWith(selectedMonth)) {
+            completed++;
+          }
+        }
       });
       setCompletedCount(completed);
     };
